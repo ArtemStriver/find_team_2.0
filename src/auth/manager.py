@@ -25,9 +25,11 @@ class UserManager(UUIDIDMixin, BaseUserManager[AuthUser, uuid.UUID]):
         user: AuthUser,
         request: Request | None = None,
     ):
-        async with async_session_maker() as session:
-            await crud.create_user_profile(user=user, session=session)
-        logger.info(f"User {user.id} has registered.")
+        print(f"User {user.id} has registered.")
+        # TODO добавить профиль пользователю, и после этого раскомментировать
+        # async with async_session_maker() as session:
+            # await crud.create_user_profile(user=user, session=session)
+        # logger.info(f"User {user.id} has registered.")
 
 # TODO написать докстринги и типизацию, понять что делает менеджер
 async def get_user_manager(user_db: Annotated[Base, Depends(get_user_db)]):

@@ -2,28 +2,28 @@ from fastapi import APIRouter
 from starlette import status
 
 from src.auth.base_config import fastapi_users_auth, auth_backend
-# from src.auth.schemas import UserCreateInput, UserCreateOutput
+from src.auth.schemas import UserCreateInput, UserCreateOutput
 
 auth_router = APIRouter(
     prefix="/auth",
     tags=["Auth"],
 )
 
-auth_router.include_router(fastapi_users_auth.get_auth_roter(auth_backend))
-# TODO добавить схемы для валидации данных
-# auth_router.include_router(
-#     fastapi_users_auth.get_register_router(
-#         UserCreateOutput,
-#         UserCreateInput,
-#     ),
-# )
-
-user_router = APIRouter(
-    prefix="/users",
-    tags=["User"]
+auth_router.include_router(fastapi_users_auth.get_auth_router(auth_backend))
+auth_router.include_router(
+    fastapi_users_auth.get_register_router(
+        UserCreateOutput,
+        UserCreateInput,
+    ),
 )
 
+
 # TODO разобраться с профилем пользователя, настроить докстринги и типизацию.
+# user_router = APIRouter(
+#     prefix="/users",
+#     tags=["User"]
+# )
+
 # @user_router.get(
 #     "/me",
 #     response_model=schemas.UserProfile,
@@ -34,8 +34,8 @@ user_router = APIRouter(
 #     session: Annotated[AsyncSession, Depends(get_async_session)],
 # ) -> schemas.UserProfile:
 #     return await crud.get_user_profile(user=user, session=session)
-
-
+#
+#
 # @user_router.patch(
 #     "/me",
 #     response_model=schemas.UserProfile,

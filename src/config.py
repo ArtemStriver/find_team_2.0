@@ -12,6 +12,9 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
 
+    PGADMIN_DEFAULT_EMAIL: str
+    PGADMIN_DEFAULT_PASSWORD: str
+
     class Config:
         env_file = ".env"
 
