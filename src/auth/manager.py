@@ -1,36 +1,33 @@
-import logging
 import uuid
-from typing import Annotated
+from typing import Optional, Annotated
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, UUIDIDMixin
 
-from src.auth import crud
 from src.auth.models import AuthUser
 from src.auth.utils import get_user_db
 from src.config import settings
-from src.database import Base, async_session_maker
-
-# TODO настроить логирование!!!
-logging.basicConfig(filename="example.log", filemode="w", level=logging.DEBUG)
-logger = logging.getLogger("find-team_logger")
+from src.database import Base
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[AuthUser, uuid.UUID]):
     reset_password_token_secret = settings.SECRET_KEY
     verification_token_secret = settings.SECRET_KEY
 
-    async def on_after_register(
-        self,
-        user: AuthUser,
-        request: Request | None = None,
-    ):
+    # TODO переделать данные функции для профиля пользователя и установить логирование
+    async def on_after_register(self, user: AuthUser, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
-        # TODO добавить профиль пользователю, и после этого раскомментировать
-        # async with async_session_maker() as session:
-            # await crud.create_user_profile(user=user, session=session)
-        # logger.info(f"User {user.id} has registered.")
 
-# TODO написать докстринги и типизацию, понять что делает менеджер
+    async def on_after_forgot_password(
+        self, user: AuthUser, token: str, request: Optional[Request] = None
+    ):
+        print(f"User {user.id} has forgot their password. Reset token: {token}")
+
+    async def on_after_request_verify(
+        self, user: AuthUser, token: str, request: Optional[Request] = None
+    ):
+        print(f"Verification requested for user {user.id}. Verification token: {token}")
+
+
 async def get_user_manager(user_db: Annotated[Base, Depends(get_user_db)]):
     yield UserManager(user_db)
