@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     PRIVATE_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-private.pem"
     PUBLIC_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-public.pem"
     ALGORITHM: str
-    COOKIE_SESSION_ID_KEY: str
+    COOKIE_ACCESS_TOKEN_KEY: str
+    COOKIE_REFRESH_TOKEN_KEY: str
 
     ACCESS_TOKEN_EXPIRES_IN: int
     REFRESH_TOKEN_EXPIRES_IN: int
