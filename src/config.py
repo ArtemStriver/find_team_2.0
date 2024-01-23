@@ -1,4 +1,9 @@
+from pathlib import Path
+
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings
+
+BASE_DIR = Path(__file__).parent.parent
 
 
 class Settings(BaseSettings):
@@ -10,10 +15,13 @@ class Settings(BaseSettings):
     CONTAINER_DB_PORT: int
     TEST_DB_NAME: str
 
-    SECRET_KEY: str
+    PRIVATE_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-private.pem"
+    PUBLIC_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-public.pem"
+    ALGORITHM: str
+    COOKIE_SESSION_ID_KEY: str
 
-    PGADMIN_DEFAULT_EMAIL: str
-    PGADMIN_DEFAULT_PASSWORD: str
+    ACCESS_TOKEN_EXPIRES_IN: int
+    REFRESH_TOKEN_EXPIRES_IN: int
 
     class Config:
         env_file = ".env"

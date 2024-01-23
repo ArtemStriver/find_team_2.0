@@ -1,21 +1,33 @@
 import uuid
+from datetime import timedelta
+from typing import Annotated
 
-from fastapi_users import schemas
-from fastapi_users.schemas import CreateUpdateDictModel
-from pydantic import EmailStr
-
-
-class UserCreateOutput(schemas.BaseUser[uuid.UUID]):
-    id: uuid.UUID
-    email: str
-    is_active: bool = True
-    is_superuser: bool = False
-    is_verified: bool = False
-
-    class Config:
-        from_attributes = True
+from annotated_types import MinLen, MaxLen
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 
-class UserCreateInput(CreateUpdateDictModel):
+class UserSchema(BaseModel):
+    model_config = ConfigDict(strict=True)
+
+    username: str | None = None
+    email: EmailStr
+    hashed_password: bytes | str
+    verified: bool = True
+
+
+class CreateUserSchema(BaseModel):
+    username: str | None = None
+    email: EmailStr
+    hashed_password: Annotated[str, MinLen(6), MaxLen(24)]
+    confirmed_password: str
+    verified: bool = True
+
+
+class LoginUserSchema(BaseModel):
     email: EmailStr
     password: str
+
+
+class TokenInfo(BaseModel):
+    access_token: str
+    token_type: str
