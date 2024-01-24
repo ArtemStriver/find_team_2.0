@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import status, HTTPException
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +14,7 @@ async def get_user(
     email: str,
     session: AsyncSession,
 ) -> UserSchema:
+    """Получение данных о пользователе из БД по email."""
     query = select(AuthUser).where(AuthUser.email == email)
     result = await session.execute(query)
     return result.scalar_one_or_none()
@@ -20,7 +23,8 @@ async def get_user(
 async def create_user(
     user_data: CreateUserSchema,
     session: AsyncSession,
-) -> dict:
+) -> UserSchema:
+    """Создание пользователя в БД."""
     if await get_user(user_data.email, session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -32,6 +36,7 @@ async def create_user(
             detail="passwords are different",
         )
     valid_user_data = UserSchema(
+        id=uuid.uuid4(),
         username=user_data.username,
         email=user_data.email,
         hashed_password=auth_utils.hash_password(user_data.hashed_password),
@@ -40,4 +45,4 @@ async def create_user(
     stmt = insert(AuthUser).values(**valid_user_data.dict())
     await session.execute(stmt)
     await session.commit()
-    return {'status': status.HTTP_201_CREATED}
+    return valid_user_data

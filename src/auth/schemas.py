@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 from annotated_types import MinLen, MaxLen
@@ -5,7 +6,7 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserSchema(BaseModel):
-    id: str
+    id: uuid.UUID
     username: str | None = None
     email: EmailStr
     hashed_password: bytes | str

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.auth.routers import auth_router

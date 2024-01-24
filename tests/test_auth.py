@@ -1,8 +1,12 @@
-# from dirty_equals import IsUUID
-from starlette import status
-from starlette.testclient import TestClient
+import asyncio
 
-from src.main import app
+import pytest
+from httpx import AsyncClient
+from starlette import status
+from dirty_equals import IsInt
+
+from src.auth import utils as auth_utils
+from src.auth.schemas import UserSchema
 
 
 class TestAuthUser:
@@ -10,22 +14,134 @@ class TestAuthUser:
 
     async def test_user_registration(
             self,
-            async_client: TestClient,
+            async_client: AsyncClient,
     ) -> None:
         """Тест на регистрацию пользователя."""
+        user_data = {
+            "username": "test_user",
+            "email": "user@example.com",
+            "hashed_password": "string",
+            "confirmed_password": "string",
+            "verified": True,
+        }
+        response = await async_client.post(
+            "/auth/register",
+            json=user_data
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == {
+            "status_code": 201,
+            "message": "test_user",
+        }
+
+    async def test_user_cookies_after_register(
+            self,
+            user: UserSchema,
+            async_client: AsyncClient,
+    ) -> None:
+        assert auth_utils.decode_jwt(async_client.cookies["find-team"]) == {
+            "email": "user@example.com",
+            "exp": IsInt,
+            "iat": IsInt,
+            "sub": str(user.id),
+            "type": "find-team",
+        }
+
+    async def test_user_login(
+            self,
+            async_client: AsyncClient,
+    ) -> None:
         user_data = {
             "email": "user@example.com",
             "password": "string"
         }
         response = await async_client.post(
-            app.url_path_for("register:register"),
-            json=user_data
+            "/auth/login",
+            data=user_data,
         )
-        assert response.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
-            # "id": IsUUID,
-            "email": user_data.get("email"),
-            "is_active": True,
-            "is_superuser": False,
-            "is_verified": False,
+            "status_code": 200,
+            "message": "test_user",
+        }
+
+    async def test_user_cookies_after_login(
+            self,
+            user: UserSchema,
+            async_client: AsyncClient,
+    ) -> None:
+        assert auth_utils.decode_jwt(async_client.cookies["find-team"]) == {
+            "email": "user@example.com",
+            "exp": IsInt,
+            "iat": IsInt,
+            "sub": str(user.id),
+            "type": "find-team",
+        }
+
+    async def test_refresh_token(
+            self,
+            async_client: AsyncClient,
+    ) -> None:
+        old_access_token = async_client.cookies["find-team"]
+        old_refresh_token = async_client.cookies["rstoken"]
+
+        await asyncio.sleep(1)
+
+        response = await async_client.get(
+            "/auth/refresh",
+            cookies={"rstoken": old_refresh_token},
+        )
+        assert (response.cookies["find-team"] != old_access_token
+                and async_client.cookies["find-team"] != old_access_token)
+        assert (response.cookies["rstoken"] != old_refresh_token
+                and async_client.cookies["rstoken"] != old_refresh_token)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "message": "test_user",
+        }
+
+    async def test_user_logout(
+            self,
+            async_client: AsyncClient,
+    ) -> None:
+
+        response = await async_client.get(
+            "/auth/logout",
+            cookies={"find-team": async_client.cookies["find-team"]},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "message": "Bye, test_user!",
+        }
+        with pytest.raises(KeyError):
+            _ = response.cookies["find-team"]
+        with pytest.raises(KeyError):
+            _ = response.cookies["rstoken"]
+
+    async def test_refresh_token_without_token(
+            self,
+            async_client: AsyncClient,
+    ) -> None:
+        """Тест обновления токенов без refresh_token и с некорректным токеном."""
+        async_client.cookies.delete("find-team")
+        async_client.cookies.delete("rstoken")
+
+        response = await async_client.get(
+            "/auth/refresh",
+            cookies={"rstoken": ""},
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.json() == {
+            "detail": "Not authenticated",
+        }
+
+        response = await async_client.get(
+            "/auth/refresh",
+            cookies={"rstoken": "some.incorrect.refresh.token"},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {
+            "detail": "could not refresh access token",
         }

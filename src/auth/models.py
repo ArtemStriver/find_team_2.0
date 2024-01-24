@@ -3,7 +3,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.database import Base
 
@@ -20,7 +20,7 @@ class AuthUser(Base):
         index=True,
         nullable=False,
     )
-    hashed_password: Mapped[bytes] = mapped_column(nullable=False) #String(length=1024),
+    hashed_password: Mapped[bytes] = mapped_column(nullable=False)
     verified: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
