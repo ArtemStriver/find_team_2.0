@@ -1,5 +1,6 @@
 import asyncio
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Generator
+from typing import Any
 
 import pytest
 from httpx import AsyncClient
@@ -46,7 +47,7 @@ async def prepare_database():
 
 
 @pytest.fixture(scope="session")
-def event_loop(request):
+def event_loop(request) -> Generator[asyncio.AbstractEventLoop, Any, None]:
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()

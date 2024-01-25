@@ -42,7 +42,7 @@ async def create_user(
         hashed_password=auth_utils.hash_password(user_data.hashed_password),
         verified=user_data.verified
     )
-    stmt = insert(AuthUser).values(**valid_user_data.dict())
+    stmt = insert(AuthUser).values(**valid_user_data.model_dump())
     await session.execute(stmt)
     await session.commit()
     return valid_user_data

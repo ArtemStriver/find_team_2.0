@@ -3,3 +3,5 @@ pythonpath = [
   ".", "src",
 ]
 asyncio_mode="auto"
+addopts="-p no:logging"
+filterwarnings="ignore::DeprecationWarning"
