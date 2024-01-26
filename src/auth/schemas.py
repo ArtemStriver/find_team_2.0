@@ -28,7 +28,7 @@ class LoginUserSchema(BaseModel):
 
 class ResponseSchema(BaseModel):
     status_code: int
-    message: str
+    detail: str
 
 
 class TokenInfo(BaseModel):

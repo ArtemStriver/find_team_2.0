@@ -42,7 +42,7 @@ async def register(
     AuthHandler.create_refresh_token(response, user)
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
-        message=user.username,
+        detail=user.username,
     )
 
 
@@ -60,7 +60,7 @@ async def login(
     AuthHandler.create_refresh_token(response, user)
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        message=user.username,
+        detail=user.username,
     )
 
 
@@ -78,7 +78,7 @@ async def refresh_token(
     AuthHandler.create_refresh_token(response, user)
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        message=user.username,
+        detail=user.username,
     )
 
 
@@ -96,5 +96,5 @@ async def logout(
     username = user.username
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        message=f"Bye, {username}!",
+        detail=f"Bye, {username}!",
     )
