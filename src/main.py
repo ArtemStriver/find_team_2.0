@@ -27,9 +27,8 @@ app.add_middleware(
 )
 
 # TODO почитать надо ли это, если да, то настроить админку.
-# admin.mount_to(app)
-
-# main_router = APIRouter(prefix='/api')
+# TODO admin.mount_to(app)
+# TODO main_router = APIRouter(prefix='/api')
 
 """Запуск роутеров"""
 app.include_router(auth_router)

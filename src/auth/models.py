@@ -5,7 +5,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
-from src.team.models import team_members_table
+from src.team.models import team_members_table, application_to_join_table
 
 
 class AuthUser(Base):
@@ -31,5 +31,11 @@ class AuthUser(Base):
         secondary=team_members_table,
     )
 
+    applications_in = relationship(
+        "Team",
+        back_populates="applications_from",
+        secondary=application_to_join_table,
+    )
+
     # TODO нужны ли настройки для юзера?
-    # settings = relationship("UserSettings", back_populates="user")
+    # TODO settings = relationship("UserSettings", back_populates="user")

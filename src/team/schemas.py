@@ -2,12 +2,11 @@ import uuid
 from datetime import datetime
 
 from pydantic import BaseModel
-from sqlalchemy import text
 
 
 class CreateTeamSchema(BaseModel):
     title: str
-    type_team: str = "other"
+    # type_team: str = "other"
     number_of_members: int
     contacts: str
     description: str
@@ -17,12 +16,12 @@ class CreateTeamSchema(BaseModel):
 
 class TeamSchema(BaseModel):
     id: uuid.UUID
-    owner: str
+    owner: uuid.UUID
     title: str
-    type_team: str
+    # type_team: str
     number_of_members: int
     contacts: str
-    description: text
+    description: str
     tags: str
     deadline_at: datetime
     created_at: datetime

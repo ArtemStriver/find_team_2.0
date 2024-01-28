@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Depends, status
 
 from src.auth.auth_handler import current_user
 from src.auth.schemas import UserSchema
@@ -14,7 +14,7 @@ find_router = APIRouter(
 Логика для пользователей.
 
 Этот модуль будет отвечать за поиск и подбор команд для пользователей,
-а также взаимодействие пользователя с командой.
+a также взаимодействие пользователя c командой.
 """
 
 
@@ -26,7 +26,6 @@ async def join_team(
     user: Annotated[UserSchema, Depends(current_user)],
 ):
     """Присоединиться к команде."""
-    pass
 
 
 @find_router.post(
@@ -37,4 +36,3 @@ async def quit_team(
     user: Annotated[UserSchema, Depends(current_user)],
 ):
     """Покинуть команду."""
-    pass

@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from sqlalchemy import text, String, ForeignKey, Table, Column
+from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -13,16 +13,37 @@ team_members_table = Table(
     Base.metadata,
     Column("user_id", ForeignKey("auth_user.id"), primary_key=True),
     Column("team_id", ForeignKey("team.id"), primary_key=True),
+)
+
+application_to_join_table = Table(
+    "application_to_join",
+    Base.metadata,
+    Column("user_id", ForeignKey("auth_user.id"), primary_key=True),
+    Column("team_id", ForeignKey("team.id"), primary_key=True),
     Column("cover_letter", String, nullable=True),
 )
 
 
+# class TeamMembers(Base):
+#     __tablename__ = "team_members"
+#
+#     user_id: Mapped[uuid.UUID] = mapped_column(
+#         ForeignKey("auth_user.id", ondelete="CASCADE"),
+#         primary_key=True,
+#     )
+#     team_id: Mapped[uuid.UUID] = mapped_column(
+#         ForeignKey("team.id", ondelete="CASCADE"),
+#         primary_key=True,
+#     )
+#     cover_letter: Mapped[Optional[str]]
+
+
 # TODO продумать какие типы команд (для каких целей) будут необходимы
-class TypeTeam(Enum):
-    sport = "sport"
-    study = "study"
-    fun = "fun"
-    other = "other"
+# class TypeTeam(Enum):
+#     sport = "sport"
+#     study = "study"
+#     fun = "fun"
+#     other = "other"
 
 
 class Team(Base):
@@ -39,9 +60,9 @@ class Team(Base):
         unique=True,
         nullable=False,
     )
-    type_team: Mapped[TypeTeam]
+    # type_team: Mapped[Optional[TypeTeam]]
     number_of_members: Mapped[int] = mapped_column(nullable=False)  # количество необходимого числа участников команды
-    # TODO продумать тип данных для контактов и какие данные будут там находиться, м/б настроить relationship
+    # TODO продумать тип данных для контактов и какие данные будут там находиться, мб настроить relationship
     contacts: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
     tags: Mapped[Optional[str]] = mapped_column(nullable=True)
@@ -55,16 +76,8 @@ class Team(Base):
         secondary=team_members_table,
     )
 
-
-# class TeamMembers(Base):
-#     __tablename__ = "team_members"
-#
-#     user_id: Mapped[uuid.UUID] = mapped_column(
-#         ForeignKey("auth_user.id", ondelete="CASCADE"),
-#         primary_key=True,
-#     )
-#     team_id: Mapped[uuid.UUID] = mapped_column(
-#         ForeignKey("team.id", ondelete="CASCADE"),
-#         primary_key=True,
-#     )
-#     cover_letter: Mapped[Optional[str]]
+    applications_from = relationship(
+        "AuthUser",
+        back_populates="applications_in",
+        secondary=application_to_join_table,
+    )

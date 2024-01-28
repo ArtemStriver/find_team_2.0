@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 
-from annotated_types import MinLen, MaxLen
+from annotated_types import MaxLen, MinLen
 from pydantic import BaseModel, EmailStr
 
 
@@ -29,8 +29,3 @@ class LoginUserSchema(BaseModel):
 class ResponseSchema(BaseModel):
     status_code: int
     detail: str
-
-
-class TokenInfo(BaseModel):
-    access_token: str
-    token_type: str

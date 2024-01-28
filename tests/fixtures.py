@@ -8,7 +8,7 @@ from tests.conftest import async_session_maker
 
 user_data = {
     "email": "user@example.com",
-    "password": "string"
+    "password": "string",
 }
 
 

@@ -3,10 +3,10 @@ from collections.abc import AsyncGenerator, Generator
 from typing import Any
 
 import pytest
+from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from sqlalchemy import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.config import settings
@@ -26,7 +26,7 @@ Base.metadata.bind = engine_test
 
 
 pytest_plugins = [
-    "tests.fixtures"
+    "tests.fixtures",
 ]
 
 
@@ -37,7 +37,7 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
 app.dependency_overrides[get_async_session] = override_get_async_session
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -47,7 +47,7 @@ async def prepare_database():
 
 
 @pytest.fixture(scope="session")
-def event_loop(request) -> Generator[asyncio.AbstractEventLoop, Any, None]:
+def event_loop(request) -> Generator[asyncio.AbstractEventLoop, Any, None]:  # noqa: ANN001
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()

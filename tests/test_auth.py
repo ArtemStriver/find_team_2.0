@@ -1,9 +1,9 @@
 import asyncio
 
 import pytest
+from dirty_equals import IsInt
 from httpx import AsyncClient
 from starlette import status
-from dirty_equals import IsInt
 
 from src.auth import utils as auth_utils
 from src.auth.schemas import UserSchema
@@ -26,12 +26,12 @@ class TestAuthUser:
         }
         response = await async_client.post(
             "/auth/register",
-            json=user_data
+            json=user_data,
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == {
             "status_code": 201,
-            "message": "test_user",
+            "detail": "test_user",
         }
 
     async def test_user_cookies_after_register(
@@ -53,7 +53,7 @@ class TestAuthUser:
     ) -> None:
         user_data = {
             "email": "user@example.com",
-            "password": "string"
+            "password": "string",
         }
         response = await async_client.post(
             "/auth/login",
@@ -62,7 +62,7 @@ class TestAuthUser:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "status_code": 200,
-            "message": "test_user",
+            "detail": "test_user",
         }
 
     async def test_user_cookies_after_login(
@@ -98,7 +98,7 @@ class TestAuthUser:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "status_code": 200,
-            "message": "test_user",
+            "detail": "test_user",
         }
 
     async def test_user_logout(
@@ -113,7 +113,7 @@ class TestAuthUser:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "status_code": 200,
-            "message": "Bye, test_user!",
+            "detail": "Bye, test_user!",
         }
         with pytest.raises(KeyError):
             _ = response.cookies["find-team"]
@@ -124,7 +124,7 @@ class TestAuthUser:
             self,
             async_client: AsyncClient,
     ) -> None:
-        """Тест обновления токенов без refresh_token и с некорректным токеном."""
+        """Тест обновления токенов без refresh_token и c некорректным токеном."""
         async_client.cookies.delete("find-team")
         async_client.cookies.delete("rstoken")
 
