@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, String, Table
@@ -22,20 +21,6 @@ application_to_join_table = Table(
     Column("team_id", ForeignKey("team.id"), primary_key=True),
     Column("cover_letter", String, nullable=True),
 )
-
-
-# class TeamMembers(Base):
-#     __tablename__ = "team_members"
-#
-#     user_id: Mapped[uuid.UUID] = mapped_column(
-#         ForeignKey("auth_user.id", ondelete="CASCADE"),
-#         primary_key=True,
-#     )
-#     team_id: Mapped[uuid.UUID] = mapped_column(
-#         ForeignKey("team.id", ondelete="CASCADE"),
-#         primary_key=True,
-#     )
-#     cover_letter: Mapped[Optional[str]]
 
 
 # TODO продумать какие типы команд (для каких целей) будут необходимы

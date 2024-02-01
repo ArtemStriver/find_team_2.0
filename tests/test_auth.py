@@ -10,7 +10,7 @@ from src.auth.schemas import UserSchema
 
 
 class TestAuthUser:
-    """Тесты на регистрацию, логин и логаут."""
+    """Тесты на регистрацию, логин, перевыпуск токенов и логаут пользователя."""
 
     async def test_user_registration(
             self,
@@ -39,6 +39,7 @@ class TestAuthUser:
             user: UserSchema,
             async_client: AsyncClient,
     ) -> None:
+        """Тест - проверка кук после регистрации пользователя."""
         assert auth_utils.decode_jwt(async_client.cookies["find-team"]) == {
             "email": "user@example.com",
             "exp": IsInt,
@@ -51,6 +52,7 @@ class TestAuthUser:
             self,
             async_client: AsyncClient,
     ) -> None:
+        """Тест авторизации пользователя."""
         user_data = {
             "email": "user@example.com",
             "password": "string",
@@ -70,6 +72,7 @@ class TestAuthUser:
             user: UserSchema,
             async_client: AsyncClient,
     ) -> None:
+        """Тест - проверка кук после авторизации пользователя."""
         assert auth_utils.decode_jwt(async_client.cookies["find-team"]) == {
             "email": "user@example.com",
             "exp": IsInt,
@@ -82,6 +85,7 @@ class TestAuthUser:
             self,
             async_client: AsyncClient,
     ) -> None:
+        """Тест - перевыпуска access_token по refresh_token."""
         old_access_token = async_client.cookies["find-team"]
         old_refresh_token = async_client.cookies["rstoken"]
 
@@ -105,7 +109,7 @@ class TestAuthUser:
             self,
             async_client: AsyncClient,
     ) -> None:
-
+        """Тест выхода пользователя и удаление токенов."""
         response = await async_client.get(
             "/auth/logout",
             cookies={"find-team": async_client.cookies["find-team"]},

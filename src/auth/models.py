@@ -5,7 +5,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
-from src.team.models import team_members_table, application_to_join_table
+from src.team.models import application_to_join_table, team_members_table
 
 
 class AuthUser(Base):

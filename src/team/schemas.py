@@ -1,7 +1,10 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
+
+from src.auth.schemas import UserSchema
 
 
 class CreateTeamSchema(BaseModel):
@@ -26,4 +29,10 @@ class TeamSchema(BaseModel):
     deadline_at: datetime
     created_at: datetime
     updated_at: datetime
+    members: Optional[list[UserSchema]]
 
+
+class ApplicationSchema(BaseModel):
+    user_id: str | uuid.UUID
+    team_id: str | uuid.UUID
+    cover_letter: str | None
