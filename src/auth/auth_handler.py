@@ -1,13 +1,15 @@
-from fastapi import Form, Depends, HTTPException, status, Response
+from typing import Annotated
+
+from fastapi import Depends, Form, HTTPException, Response, status
 from fastapi.security import APIKeyCookie
 from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.crud import get_user
 from src.auth import utils as auth_utils
+from src.auth.crud import get_user
 from src.auth.schemas import UserSchema
-from src.database import get_async_session
 from src.config import settings
+from src.database import get_async_session
 
 
 class AuthHandler:
@@ -17,9 +19,9 @@ class AuthHandler:
     @classmethod
     async def validate_auth_user(
         cls,
+        session: Annotated[AsyncSession, Depends(get_async_session)],
         email: str = Form(),
         password: str = Form(),
-        session: AsyncSession = Depends(get_async_session),
     ):
         """Идентификация данных пользователя."""
         unauthenticated_exception = HTTPException(
@@ -44,7 +46,7 @@ class AuthHandler:
             raise custom_exception
         if not auth_utils.validate_password(
             password=user_password,
-            hashed_password=user.hashed_password
+            hashed_password=user.hashed_password,
         ):
             raise custom_exception
         if not user.verified:
@@ -56,8 +58,8 @@ class AuthHandler:
     @classmethod
     async def get_auth_user(
         cls,
+        session: Annotated[AsyncSession, Depends(get_async_session)],
         access_token: str = Depends(cookies_access_scheme),
-        session: AsyncSession = Depends(get_async_session),
     ) -> UserSchema:
         """
         Получение данных аутентифицированного пользователя.
@@ -68,19 +70,18 @@ class AuthHandler:
             payload = auth_utils.decode_jwt(
                 token=access_token,
             )
-            user = await cls._check_token_data(payload, session)
+            return await cls._check_token_data(payload, session)
         except InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="invalid token error",
-            )
-        return user
+            ) from None
 
     @classmethod
     async def check_user_refresh_token(
         cls,
-        refresh_token: str = Depends(cookies_refresh_scheme),
-        session: AsyncSession = Depends(get_async_session),
+        refresh_token: Annotated[str, Depends(cookies_refresh_scheme)],
+        session: Annotated[AsyncSession, Depends(get_async_session)],
     ) -> UserSchema:
         """Проверка refresh token на подлинность."""
         try:
@@ -91,8 +92,8 @@ class AuthHandler:
         except InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="could not refresh access token"
-            )
+                detail="could not refresh access token",
+            ) from None
         return user
 
     @staticmethod
@@ -105,18 +106,18 @@ class AuthHandler:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="could not refresh access token",
-            )
+            ) from None
         email: str = payload.get("email")
         if not (user := await get_user(email, session)):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="the user no longer exists",
-            )
+            ) from None
         if not user.verified:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="user unverified",
-            )
+            ) from None
         return user
 
     @staticmethod
@@ -140,7 +141,7 @@ class AuthHandler:
     def create_access_token(
         cls,
         response: Response,
-        user_data: UserSchema = Depends(validate_auth_user),
+        user_data: Annotated[UserSchema, Depends(validate_auth_user)],
     ) -> str:
         """Создание access_token."""
         return cls._create_token(
@@ -154,7 +155,7 @@ class AuthHandler:
     def create_refresh_token(
         cls,
         response: Response,
-        user_data: UserSchema = Depends(validate_auth_user),
+        user_data: Annotated[UserSchema, Depends(validate_auth_user)],
     ) -> dict:
         """Создание refresh_token."""
         return cls._create_token(

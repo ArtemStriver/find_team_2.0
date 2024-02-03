@@ -1,12 +1,12 @@
 import uuid
 
-from fastapi import status, HTTPException
-from sqlalchemy import select, insert
+from fastapi import HTTPException, status
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.models import AuthUser
-from src.auth.schemas import UserSchema, CreateUserSchema
 from src.auth import utils as auth_utils
+from src.auth.models import AuthUser
+from src.auth.schemas import CreateUserSchema, UserSchema
 
 
 # TODO добавить это в кэш.
@@ -14,7 +14,7 @@ async def get_user(
     email: str,
     session: AsyncSession,
 ) -> UserSchema:
-    """Получение данных о пользователе из БД по email."""
+    """Получение данных o пользователе из БД по email."""
     query = select(AuthUser).where(AuthUser.email == email)
     result = await session.execute(query)
     return result.scalar_one_or_none()
@@ -40,7 +40,7 @@ async def create_user(
         username=user_data.username,
         email=user_data.email,
         hashed_password=auth_utils.hash_password(user_data.hashed_password),
-        verified=user_data.verified
+        verified=user_data.verified,
     )
     stmt = insert(AuthUser).values(**valid_user_data.model_dump())
     await session.execute(stmt)

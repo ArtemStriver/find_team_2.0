@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.auth.routers import auth_router
+from src.find.routers import find_router
+from src.team.routers import team_router
 
 app = FastAPI(
     title="Find Team 2.0",
@@ -26,9 +28,10 @@ app.add_middleware(
 )
 
 # TODO почитать надо ли это, если да, то настроить админку.
-# admin.mount_to(app)
-
-# main_router = APIRouter(prefix='/api')
+# TODO admin.mount_to(app)
+# TODO main_router = APIRouter(prefix='/api')
 
 """Запуск роутеров"""
 app.include_router(auth_router)
+app.include_router(team_router)
+app.include_router(find_router)

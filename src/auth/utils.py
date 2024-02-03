@@ -10,7 +10,7 @@ def encode_jwt(
     payload: dict,
     private_key: str = settings.PRIVATE_KEY_PATH.read_text(),
     algorithm: str = settings.ALGORITHM,
-    expire_minutes: int = settings.ACCESS_TOKEN_EXPIRES_IN
+    expire_minutes: int = settings.ACCESS_TOKEN_EXPIRES_IN,
 ) -> str:
     """Кодировка данных в JWT токен."""
     to_encode = payload.copy()
@@ -20,12 +20,11 @@ def encode_jwt(
         exp=expire,
         iat=now,
     )
-    encoded = jwt.encode(
+    return jwt.encode(
         to_encode,
         private_key,
-        algorithm=algorithm
+        algorithm=algorithm,
     )
-    return encoded
 
 
 def decode_jwt(
@@ -34,12 +33,11 @@ def decode_jwt(
     algorithm: str = settings.ALGORITHM,
 ) -> dict:
     """Декодировка JWT токена в данные."""
-    decoded = jwt.decode(
+    return  jwt.decode(
         token,
         public_key,
         algorithms=[algorithm],
     )
-    return decoded
 
 
 def hash_password(
@@ -49,7 +47,7 @@ def hash_password(
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(
         password=password.encode(),
-        salt=salt
+        salt=salt,
     )
 
 

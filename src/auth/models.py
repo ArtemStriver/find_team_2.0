@@ -1,18 +1,18 @@
 import uuid
 from datetime import datetime
-from uuid import UUID
 
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
+from src.team.models import application_to_join_table, team_members_table
 
 
 class AuthUser(Base):
     """Базовая модель пользователя."""
     __tablename__ = "auth_user"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(
         String(length=50),
@@ -25,5 +25,17 @@ class AuthUser(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
+    teams = relationship(
+        "Team",
+        back_populates="members",
+        secondary=team_members_table,
+    )
+
+    applications_in = relationship(
+        "Team",
+        back_populates="applications_from",
+        secondary=application_to_join_table,
+    )
+
     # TODO нужны ли настройки для юзера?
-    # settings = relationship("UserSettings", back_populates="user")
+    # TODO settings = relationship("UserSettings", back_populates="user")
