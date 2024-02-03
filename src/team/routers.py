@@ -25,6 +25,7 @@ a также за управление командой.
 
 @team_router.post(
     "/create",
+    response_model=ResponseSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_team(
@@ -36,20 +37,24 @@ async def create_team(
 
 
 @team_router.patch(
-    "/change",
+    "/change/{team_id}",
+    response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
 async def update_team(
     team_id: uuid.UUID,
-    update_data: TeamSchema,
+    update_data: CreateTeamSchema,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
 ) -> ResponseSchema:
     return await crud.update_team(team_id, update_data, session, user)
 
 
+# TODO надо организовать автоматическое удаление команды по истечению дедлайна + пара часов или день.
 @team_router.delete(
-    "/delete",
+    "/delete/{team_id}",
+    response_model=ResponseSchema,
+    status_code=status.HTTP_200_OK,
 )
 async def delete_team(
     team_id: uuid.UUID,
@@ -61,6 +66,7 @@ async def delete_team(
 
 @team_router.get(
     "/my_team",
+    response_model=TeamSchema,
     status_code=status.HTTP_200_OK,
 )
 async def get_my_team(

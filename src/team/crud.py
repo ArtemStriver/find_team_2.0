@@ -15,6 +15,7 @@ async def create_team(
     session: AsyncSession,
     user: UserSchema,
 ) -> ResponseSchema:
+    """Создание команды."""
     if user_team := await get_user_team(user_id=user.id, session=session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -32,14 +33,21 @@ async def create_team(
 
 async def update_team(
     team_id: uuid.UUID,
-    update_data: TeamSchema,
+    update_data: CreateTeamSchema,
     session: AsyncSession,
     user: UserSchema,
 ) -> ResponseSchema:
-    new_team_data = {**update_data.model_dump()}
+    """Обновление команды."""
     stmt = (
         update(Team)
-        .values(new_team_data)
+        .values({
+            "title": update_data.title,
+            "number_of_members": update_data.number_of_members,
+            "contacts": update_data.contacts,
+            "description": update_data.description,
+            "tags": update_data.tags,
+            "deadline_at": update_data.deadline_at,
+        })
         .where(and_(
             Team.id == team_id,
             Team.owner == user.id,
@@ -59,6 +67,7 @@ async def delete_team(
     session: AsyncSession,
     user: UserSchema,
 ) -> ResponseSchema:
+    """Удаление команды."""
     if not (team := await get_user_team(user_id=user.id, session=session)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -74,7 +83,8 @@ async def delete_team(
             detail="no access",
         )
     return ResponseSchema(
-        status_code=status.HTTP_204_NO_CONTENT,
+        status_code=status.HTTP_200_OK,
+        detail="team is deleted",
     )
 
 
@@ -82,6 +92,7 @@ async def get_user_team(
     user_id: uuid.UUID,
     session: AsyncSession,
 ) -> TeamSchema | None:
+    """Получение команды пользователя."""
     query = (
         select(Team)
         .options(selectinload(Team.members))
@@ -95,6 +106,7 @@ async def get_application_list(
     team_id: str,
     session: AsyncSession,
 ) -> list[ApplicationSchema]:
+    """Получение заявок на вступление в команду."""
     query = select(application_to_join_table).where(application_to_join_table.c.team_id == team_id)
     result = await session.execute(query)
     return result.all()
@@ -105,6 +117,7 @@ async def move_comrade_into_team(
     team_id: str,
     session: AsyncSession,
 ) -> ResponseSchema:
+    """Принять заявку пользователя на вступление в команду."""
     try:
         stmt = insert(team_members_table).values(
             {"user_id": comrade_id, "team_id": team_id},
@@ -118,7 +131,7 @@ async def move_comrade_into_team(
             status_code=status.HTTP_200_OK,
             detail="comrade added into team",
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="invalid data",
@@ -130,6 +143,7 @@ async def remove_application_of_comrade(
     team_id: str,
     session: AsyncSession,
 ) -> ResponseSchema:
+    """Отклонить заявку пользователя на вступление в команду."""
     try:
         await _delete_application(comrade_id, team_id, session)
 
@@ -138,7 +152,7 @@ async def remove_application_of_comrade(
             status_code=status.HTTP_200_OK,
             detail="comrade's application is rejected",
         )
-    except Exception:
+    except Exception:  # noqa: BLE001
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="invalid data",
@@ -150,6 +164,7 @@ async def _delete_application(
     team_id: str,
     session: AsyncSession,
 ) -> None:
+    """Удалить заявку из БД."""
     stmt = delete(application_to_join_table).where(
         and_(
             application_to_join_table.c.user_id == comrade_id,
@@ -165,6 +180,7 @@ async def exclude_comrade_from_team(
     team_id: str,
     session: AsyncSession,
 ) -> ResponseSchema:
+    """Исключить пользователя из команды."""
     query = select(Team).where(Team.id == team_id)
     result = await session.execute(query)
     if result.scalar_one_or_none().owner == user_id:

@@ -10,7 +10,7 @@ from src.auth.schemas import UserSchema
 class CreateTeamSchema(BaseModel):
     title: str
     # type_team: str = "other"
-    number_of_members: int
+    number_of_members: int = 1
     contacts: str
     description: str
     tags: str
