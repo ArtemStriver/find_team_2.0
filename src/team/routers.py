@@ -90,10 +90,10 @@ async def get_my_team(
 async def get_applications(
     team_id: str,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    _: Annotated[UserSchema, Depends(current_user)],
+    user: Annotated[UserSchema, Depends(current_user)],
 ) -> list[ApplicationSchema]:
     """Получение списка всех заявок на вступление в команду пользователя."""
-    return await crud.get_application_list(team_id, session)
+    return await crud.get_application_list(team_id, user, session)
 
 
 @team_router.post(

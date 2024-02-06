@@ -49,6 +49,7 @@ class Team(Base):
     number_of_members: Mapped[int] = mapped_column(nullable=False)  # количество необходимого числа участников команды
     # TODO продумать тип данных для контактов и какие данные будут там находиться, мб настроить relationship
     contacts: Mapped[str] = mapped_column(nullable=False)
+    # TODO подумать, может добавить мини описание или сделать как отрывок из главного описания.
     description: Mapped[str] = mapped_column(nullable=False)
     # TODO сделать фиксированное количество тегов и чтобы они заполнялись как как в словарь - одинаково.
     tags: Mapped[Optional[str]] = mapped_column(nullable=True)

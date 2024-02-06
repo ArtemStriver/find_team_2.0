@@ -1,9 +1,14 @@
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.auth_handler import current_user
-from src.auth.schemas import UserSchema
+from src.auth.schemas import UserSchema, ResponseSchema
+from src.database import get_async_session
+from src.find import crud
+from src.team.schemas import TeamSchema
 
 find_router = APIRouter(
     prefix="/find",
@@ -24,35 +29,52 @@ a также взаимодействие пользователя c коман�
 )
 async def get_all_teams(
     user: Annotated[UserSchema, Depends(current_user)],
-):
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> list[TeamSchema]:
     """Получить список всех доступных команд."""
+    # TODO ручка возвращает список команд со всеми их данными, необходимо на фронтенде реализовать отображение
+    #  не всех данных (только необходимых для превью),
+    #  при подробном рассмотрении данные подтягиваются из уже подгруженных. Ну или реализовать валидацию на бэкенде.
+    return await crud.get_teams_list(user, session)
 
 
 @find_router.get(
-    "/find_team",
+    "/team/{team_id}",
     status_code=status.HTTP_200_OK,
 )
 async def get_team(
-    user: Annotated[UserSchema, Depends(current_user)],
-):
-    """Поиск команды."""
+    team_id: uuid.UUID,
+    _: Annotated[UserSchema, Depends(current_user)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> TeamSchema:
+    """Посмотреть данные о команде подробнее."""
+    return await crud.get_team_data(team_id, session)
 
 
 @find_router.post(
     "/join",
-    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=ResponseSchema,
+    status_code=status.HTTP_200_OK,
 )
 async def join_team(
+    team_id: uuid.UUID,
+    cover_letter: str,
     user: Annotated[UserSchema, Depends(current_user)],
-):
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> ResponseSchema:
     """Присоединиться к команде."""
+    return await crud.join_in_team(team_id, cover_letter, user, session)
 
 
 @find_router.post(
-    "/quit",
-    status_code=status.HTTP_204_NO_CONTENT,
+    "/quit/{team_id}",
+    response_model=ResponseSchema,
+    status_code=status.HTTP_200_OK,
 )
 async def quit_team(
+    team_id: uuid.UUID,
     user: Annotated[UserSchema, Depends(current_user)],
-):
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> ResponseSchema:
     """Покинуть команду."""
+    return await crud.leave_team(team_id, user, session)

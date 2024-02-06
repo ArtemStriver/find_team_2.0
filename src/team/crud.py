@@ -103,18 +103,27 @@ async def get_user_team(
 
 
 async def get_application_list(
-    team_id: str,
+    team_id: uuid.UUID,
+    user: UserSchema,
     session: AsyncSession,
 ) -> list[ApplicationSchema]:
     """Получение заявок на вступление в команду."""
-    query = select(application_to_join_table).where(application_to_join_table.c.team_id == team_id)
+    query = select(Team).where(Team.id == team_id)
     result = await session.execute(query)
+    if result.scalar_one_or_none().owner == user.id:
+        query = select(application_to_join_table).where(application_to_join_table.c.team_id == team_id)
+        result = await session.execute(query)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="no access",
+        ) from None
     return result.all()
 
 
 async def move_comrade_into_team(
-    comrade_id: str,
-    team_id: str,
+    comrade_id: uuid.UUID,
+    team_id: uuid.UUID,
     session: AsyncSession,
 ) -> ResponseSchema:
     """Принять заявку пользователя на вступление в команду."""
@@ -139,8 +148,8 @@ async def move_comrade_into_team(
 
 
 async def remove_application_of_comrade(
-    comrade_id: str,
-    team_id: str,
+    comrade_id: uuid.UUID,
+    team_id: uuid.UUID,
     session: AsyncSession,
 ) -> ResponseSchema:
     """Отклонить заявку пользователя на вступление в команду."""
@@ -160,8 +169,8 @@ async def remove_application_of_comrade(
 
 
 async def _delete_application(
-    comrade_id: str,
-    team_id: str,
+    comrade_id: uuid.UUID,
+    team_id: uuid.UUID,
     session: AsyncSession,
 ) -> None:
     """Удалить заявку из БД."""
@@ -176,8 +185,8 @@ async def _delete_application(
 
 async def exclude_comrade_from_team(
     user_id: uuid.UUID,
-    comrade_id: str,
-    team_id: str,
+    comrade_id: uuid.UUID,
+    team_id: uuid.UUID,
     session: AsyncSession,
 ) -> ResponseSchema:
     """Исключить пользователя из команды."""
