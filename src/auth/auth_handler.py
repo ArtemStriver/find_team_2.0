@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
 from src.auth.crud import get_user
+from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema
 from src.config import settings
 from src.database import get_async_session
@@ -22,7 +23,7 @@ class AuthHandler:
         session: Annotated[AsyncSession, Depends(get_async_session)],
         email: str = Form(),
         password: str = Form(),
-    ):
+    ) -> AuthUser:
         """Идентификация данных пользователя."""
         unauthenticated_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,7 +39,7 @@ class AuthHandler:
 
     @staticmethod
     def _verify_user(
-        user: UserSchema,
+        user: AuthUser,
         user_password: str | bytes,
         custom_exception: HTTPException,
     ) -> None:
@@ -82,7 +83,7 @@ class AuthHandler:
         cls,
         refresh_token: Annotated[str, Depends(cookies_refresh_scheme)],
         session: Annotated[AsyncSession, Depends(get_async_session)],
-    ) -> UserSchema:
+    ) -> AuthUser:
         """Проверка refresh token на подлинность."""
         try:
             payload = auth_utils.decode_jwt(
@@ -100,7 +101,7 @@ class AuthHandler:
     async def _check_token_data(
         payload: dict,
         session: AsyncSession,
-    ) -> UserSchema:
+    ) -> AuthUser:
         """Функция проверки данных токена."""
         if not payload.get("sub"):
             raise HTTPException(
@@ -164,6 +165,16 @@ class AuthHandler:
             expires_time=settings.REFRESH_TOKEN_EXPIRES_IN,
             data=user_data,
         )
+
+    @classmethod
+    def create_all_tokens(
+        cls,
+        response: Response,
+        user: AuthUser,
+    ) -> None:
+        """Создание всех токенов пользователя."""
+        cls.create_access_token(response, user)
+        cls.create_refresh_token(response, user)
 
     @staticmethod
     def delete_all_tokens(

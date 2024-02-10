@@ -1,23 +1,21 @@
 import uuid
-from typing import Annotated
 
-from sqlalchemy import select, and_, insert, delete
+from fastapi import HTTPException, status
+from sqlalchemy import and_, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from fastapi import status, HTTPException, Form
 
-from src.auth.schemas import UserSchema, ResponseSchema
+from src.auth.schemas import ResponseSchema, UserSchema
 from src.team.models import Team, application_to_join_table, team_members_table
 from src.team.schemas import TeamSchema
 
 
 async def get_teams_list(
-    user: UserSchema,
     session: AsyncSession,
 ) -> list[TeamSchema]:
+    """Получение списка всех имеющихся команд."""
     query = (select(Team)
-             .options(selectinload(Team.members))
-             .where(Team.owner != user.id))
+             .options(selectinload(Team.members)))
     result = await session.execute(query)
     return result.scalars().all()
 
@@ -27,14 +25,19 @@ async def get_team_data(
     session: AsyncSession,
 ) -> TeamSchema | None:
     """Получение данных команды."""
-    # TODO нужно будет добавить проверку доступа пользователя к данной команде - задел на приватизацию проекта.
     query = (
         select(Team)
         .options(selectinload(Team.members))
         .where(Team.id == team_id)
     )
-    team = await session.execute(query)
-    return team.unique().scalar_one_or_none()
+    result = await session.execute(query)
+    team = result.unique().scalar_one_or_none()
+    if not team:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="there is no such team",
+        ) from None
+    return team
 
 
 async def join_in_team(
@@ -69,6 +72,19 @@ async def leave_team(
     session: AsyncSession,
 ) -> ResponseSchema:
     """Покинуть команду."""
+    query = select(team_members_table).where(
+        and_(
+            team_members_table.c.user_id == user.id,
+            team_members_table.c.team_id == team_id,
+        ),
+    )
+    check = await session.execute(query)
+    if not check.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="there is no such user in the team",
+        ) from None
+
     stmt = delete(team_members_table).where(
         and_(
             team_members_table.c.user_id == user.id,

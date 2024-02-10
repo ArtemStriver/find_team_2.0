@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.auth_handler import current_user
-from src.auth.schemas import UserSchema, ResponseSchema
+from src.auth.schemas import ResponseSchema, UserSchema
 from src.database import get_async_session
 from src.find import crud
+from src.find.schemas import TeamPreviewSchema
 from src.team.schemas import TeamSchema
 
 find_router = APIRouter(
@@ -28,14 +29,10 @@ a также взаимодействие пользователя c коман�
     status_code=status.HTTP_200_OK,
 )
 async def get_all_teams(
-    user: Annotated[UserSchema, Depends(current_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
-) -> list[TeamSchema]:
+) -> list[TeamPreviewSchema]:
     """Получить список всех доступных команд."""
-    # TODO ручка возвращает список команд со всеми их данными, необходимо на фронтенде реализовать отображение
-    #  не всех данных (только необходимых для превью),
-    #  при подробном рассмотрении данные подтягиваются из уже подгруженных. Ну или реализовать валидацию на бэкенде.
-    return await crud.get_teams_list(user, session)
+    return await crud.get_teams_list(session)
 
 
 @find_router.get(
@@ -47,7 +44,7 @@ async def get_team(
     _: Annotated[UserSchema, Depends(current_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> TeamSchema:
-    """Посмотреть данные о команде подробнее."""
+    """Посмотреть данные o команде подробнее."""
     return await crud.get_team_data(team_id, session)
 
 

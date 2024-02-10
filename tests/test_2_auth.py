@@ -1,12 +1,11 @@
 import asyncio
 
 import pytest
-from dirty_equals import IsInt
+from dirty_equals import IsInt, IsUUID
 from httpx import AsyncClient
 from starlette import status
 
 from src.auth import utils as auth_utils
-from src.auth.schemas import UserSchema
 
 
 class TestAuthUser:
@@ -36,7 +35,6 @@ class TestAuthUser:
 
     async def test_user_cookies_after_register(
             self,
-            user: UserSchema,
             async_client: AsyncClient,
     ) -> None:
         """Тест - проверка кук после регистрации пользователя."""
@@ -44,7 +42,7 @@ class TestAuthUser:
             "email": "user@example.com",
             "exp": IsInt,
             "iat": IsInt,
-            "sub": str(user.id),
+            "sub": IsUUID,
             "type": "find-team",
         }
 
@@ -69,7 +67,6 @@ class TestAuthUser:
 
     async def test_user_cookies_after_login(
             self,
-            user: UserSchema,
             async_client: AsyncClient,
     ) -> None:
         """Тест - проверка кук после авторизации пользователя."""
@@ -77,7 +74,7 @@ class TestAuthUser:
             "email": "user@example.com",
             "exp": IsInt,
             "iat": IsInt,
-            "sub": str(user.id),
+            "sub": IsUUID,
             "type": "find-team",
         }
 

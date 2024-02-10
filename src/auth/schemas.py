@@ -5,12 +5,10 @@ from annotated_types import MaxLen, MinLen
 from pydantic import BaseModel, EmailStr
 
 
-# TODO необходимо убрать пароль из схемы пользователя, сделать как в проекте мир.
 class UserSchema(BaseModel):
     id: uuid.UUID
     username: str | None = None
     email: EmailStr
-    hashed_password: bytes | str
     verified: bool = True
 
 
