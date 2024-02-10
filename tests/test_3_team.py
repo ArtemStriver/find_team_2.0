@@ -12,7 +12,7 @@ class TestTeamModule:
     async def test_create_team(
             self,
             async_client: AsyncClient,
-            auth_user_cookies: dict,
+            test_user_cookies: dict,
     ) -> None:
         """Тест на корректное создание команды."""
         team_data = {
@@ -26,7 +26,7 @@ class TestTeamModule:
         response = await async_client.post(
             "/team/create",
             json=team_data,
-            cookies=auth_user_cookies,
+            cookies=test_user_cookies,
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == {
@@ -37,12 +37,12 @@ class TestTeamModule:
     async def test_get_user_team(
             self,
             async_client: AsyncClient,
-            auth_user_cookies: dict,
+            test_user_cookies: dict,
     ) -> None:
         """Тест на получение данных o команде пользователя."""
         response = await async_client.get(
             "/team/my_team",
-            cookies=auth_user_cookies,
+            cookies=test_user_cookies,
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -62,9 +62,9 @@ class TestTeamModule:
     async def test_update_team(
             self,
             async_client: AsyncClient,
-            auth_user_cookies: dict,
+            test_user_cookies: dict,
             auth_user: UserSchema,
-            test_team: TeamSchema,
+            user_team: TeamSchema,
     ) -> None:
         """Тест на изменение данных в команде."""
         new_team_data = {
@@ -76,9 +76,9 @@ class TestTeamModule:
             "deadline_at": "2024-02-02T05:00:53",
         }
         response = await async_client.patch(
-            f"/team/change/{test_team.id}",
+            f"/team/change/{user_team.id}",
             json=new_team_data,
-            cookies=auth_user_cookies,
+            cookies=test_user_cookies,
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -87,7 +87,7 @@ class TestTeamModule:
         }
         response = await async_client.get(
             "/team/my_team",
-            cookies=auth_user_cookies,
+            cookies=test_user_cookies,
         )
         assert response.json() == {
             "id": IsUUID,
@@ -106,14 +106,14 @@ class TestTeamModule:
     async def test_delete_team(
             self,
             async_client: AsyncClient,
-            auth_user_cookies: dict,
+            test_user_cookies: dict,
             auth_user: UserSchema,
-            test_team: TeamSchema,
+            user_team: TeamSchema,
     ) -> None:
         """Тест на удаление команды."""
         response = await async_client.delete(
-            f"/team/delete/{test_team.id}",
-            cookies=auth_user_cookies,
+            f"/team/delete/{user_team.id}",
+            cookies=test_user_cookies,
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -122,7 +122,7 @@ class TestTeamModule:
         }
         response = await async_client.get(
             "/team/my_team",
-            cookies=auth_user_cookies,
+            cookies=test_user_cookies,
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -151,7 +151,7 @@ class TestTeamModule:
             self,
             async_client: AsyncClient,
             auth_user: UserSchema,
-            test_team: TeamSchema,
+            user_team: TeamSchema,
     ) -> None:
         """Тест на изменение данных в команде без токена."""
         new_team_data = {
@@ -163,7 +163,7 @@ class TestTeamModule:
             "deadline_at": "2024-02-02T05:00:53",
         }
         response = await async_client.patch(
-            f"/team/change/{test_team.id}",
+            f"/team/change/{user_team.id}",
             json=new_team_data,
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -172,13 +172,13 @@ class TestTeamModule:
     async def test_delete_team_without_token(
             self,
             async_client: AsyncClient,
-            auth_user_cookies: dict,
+            test_user_cookies: dict,
             auth_user: UserSchema,
-            test_team: TeamSchema,
+            user_team: TeamSchema,
     ) -> None:
         """Тест на удаление команды без токена."""
         response = await async_client.delete(
-            f"/team/delete/{test_team.id}",
+            f"/team/delete/{user_team.id}",
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert response.json() == {"detail": "Not authenticated"}

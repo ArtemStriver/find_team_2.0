@@ -9,7 +9,6 @@ class UserSchema(BaseModel):
     id: uuid.UUID
     username: str | None = None
     email: EmailStr
-    hashed_password: bytes | str
     verified: bool = True
 
 

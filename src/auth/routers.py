@@ -24,7 +24,7 @@ auth_router = APIRouter(
     tags=["Auth"],
 )
 
-# TODO поправить стиль передачи переменных в функции, настроить ruff.
+
 @auth_router.post(
     "/register",
     response_model=ResponseSchema,
@@ -41,8 +41,7 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="invalid user data",
         )
-    AuthHandler.create_access_token(response, user)
-    AuthHandler.create_refresh_token(response, user)
+    AuthHandler.create_all_tokens(response, user)
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
         detail=user.username,
@@ -59,8 +58,7 @@ async def login(
     user: Annotated[LoginUserSchema, Depends(AuthHandler.validate_auth_user)],
 ) -> ResponseSchema:
     """Проверка и вход пользователя c выдачей ему access и refresh token."""
-    AuthHandler.create_access_token(response, user)
-    AuthHandler.create_refresh_token(response, user)
+    AuthHandler.create_all_tokens(response, user)
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
         detail=user.username,
@@ -77,8 +75,7 @@ async def refresh_token(
     user: Annotated[UserSchema, Depends(AuthHandler.check_user_refresh_token)],
 ) -> ResponseSchema:
     """Обновление access_token при наличии действующего refresh_token."""
-    AuthHandler.create_access_token(response, user)
-    AuthHandler.create_refresh_token(response, user)
+    AuthHandler.create_all_tokens(response, user)
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
         detail=user.username,
