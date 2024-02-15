@@ -41,6 +41,7 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="invalid user data",
         )
+    # TODO убрать выдачу токенов, сделать выдачу письма на почту пользователя с ссылкой для подтверждения.
     AuthHandler.create_all_tokens(response, user)
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
@@ -98,3 +99,19 @@ async def logout(
         status_code=status.HTTP_200_OK,
         detail=f"Bye, {username}!",
     )
+
+
+@auth_router.patch(
+    "/verify",
+    response_model=ResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def verify(
+    response: Response,
+) -> ResponseSchema:
+    """Проверка подлинности email адреса пользователя."""
+    # TODO после регистрации пользователю отправляется письмо на почту с ссылкой
+    # TODO (с этой ручкой и секретным кодом, хранящимся на стороне сервера, а лучше генерящимся
+    # TODO индивидуально пользователю), перейдя по ней, пользователь меняет статус
+    # TODO verified с False на True и получает доступ к сервису (ему сразу выписывают токены)
+

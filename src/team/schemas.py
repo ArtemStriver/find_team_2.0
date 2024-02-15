@@ -32,6 +32,11 @@ class TeamSchema(BaseModel):
     members: Optional[list[UserSchema]]
 
 
+class MemberSchema(BaseModel):
+    team_id: str | uuid.UUID
+    user_id: str | uuid.UUID
+
+
 class ApplicationSchema(BaseModel):
     user_id: str | uuid.UUID
     team_id: str | uuid.UUID

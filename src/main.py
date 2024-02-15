@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 from src.auth.routers import auth_router
 from src.find.routers import find_router
 from src.team.routers import team_router
+from src.user_profile.routers import profile_router
 
 app = FastAPI(
     title="Find Team 2.0",
@@ -33,5 +34,6 @@ app.add_middleware(
 
 """Запуск роутеров"""
 app.include_router(auth_router)
+app.include_router(profile_router)
 app.include_router(team_router)
 app.include_router(find_router)

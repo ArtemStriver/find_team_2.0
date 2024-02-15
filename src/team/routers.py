@@ -7,8 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.auth_handler import current_user
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.database import get_async_session
+from src.find.schemas import TeamPreviewSchema
 from src.team import crud
-from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema
+from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema, MemberSchema
 
 team_router = APIRouter(
     prefix="/team",
@@ -65,21 +66,17 @@ async def delete_team(
 
 
 @team_router.get(
-    "/my_team",
-    response_model=TeamSchema,
+    "/members_list",
+    response_model=list[MemberSchema],
     status_code=status.HTTP_200_OK,
 )
-async def get_my_team(
+async def get_members(
+    team_id: str,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> TeamSchema | None:
-    """Получение данных o команде пользователя."""
-    if not (team := await crud.get_user_team(user.id, session)):
-        raise HTTPException(
-            status_code=status.HTTP_204_NO_CONTENT,
-            detail="user has not any team",
-        )
-    return team
+) -> list[MemberSchema]:
+    """Получение списка всех заявок на вступление в команду пользователя."""
+    return await crud.get_application_list(team_id, user, session)
 
 
 @team_router.get(

@@ -135,7 +135,7 @@ class AuthHandler:
             "type": type_token,
         }
         token = auth_utils.encode_jwt(jwt_payload, expire_minutes=expires_time)
-        response.set_cookie(type_token, token)
+        response.set_cookie(type_token, token, httponly=True, secure=False)
         return token
 
     @classmethod

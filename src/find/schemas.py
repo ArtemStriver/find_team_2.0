@@ -8,6 +8,6 @@ class TeamPreviewSchema(BaseModel):
     id: uuid.UUID
     title: str
     # type_team: str = "other"
-    number_of_members: int = 1
+    number_of_members: int
     tags: str
     deadline_at: datetime
