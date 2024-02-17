@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     CONTAINER_DB_PORT: int
     TEST_DB_NAME: str
 
+    REDIS_HOST: str
+    REDIS_PORT: int
+
     PRIVATE_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-private.pem"
     PUBLIC_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-public.pem"
     ALGORITHM: str
@@ -40,6 +43,11 @@ class Settings(BaseSettings):
                     f"@{self.DB_HOST}:{self.DB_PORT}/{self.TEST_DB_NAME}")
 
         return self.db_url_postgresql
+
+    @property
+    def db_url_redis(self) -> str:
+        """Product db url."""
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
 
 
 settings = Settings()

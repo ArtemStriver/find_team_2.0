@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.auth.schemas import ResponseSchema, UserSchema
+from src.find.crud import get_team_data
 from src.team.models import Team, application_to_join_table, team_members_table
 from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema, MemberSchema
 
@@ -68,7 +69,7 @@ async def delete_team(
     user: UserSchema,
 ) -> ResponseSchema:
     """Удаление команды."""
-    if not (team := await get_user_team(team_id=team_id, user_id=user.id, session=session)):
+    if not (team := await get_team_data(team_id=team_id, session=session)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="there is no such team",

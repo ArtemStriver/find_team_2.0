@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import HTTPException, status
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +16,16 @@ async def get_user(
 ) -> AuthUser:
     """Получение данных o пользователе из БД по email."""
     query = select(AuthUser).where(AuthUser.email == email)
+    result = await session.execute(query)
+    return result.scalar_one_or_none()
+
+
+async def get_user_by_id(
+    user_id: uuid.UUID,
+    session: AsyncSession,
+) -> AuthUser:
+    """Получение данных o пользователе из БД по id."""
+    query = select(AuthUser).where(AuthUser.id == user_id)
     result = await session.execute(query)
     return result.scalar_one_or_none()
 
