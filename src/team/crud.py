@@ -17,11 +17,6 @@ async def create_team(
     user: UserSchema,
 ) -> ResponseSchema:
     """Создание команды."""
-    # if user_team := await get_user_team(user_id=user.id, session=session):
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail=f"user {user.username} already have one team {user_team.title}",
-    #     )
     full_team_data = {"owner": user.id, **team_data.model_dump()}
     stmt = insert(Team).values(**full_team_data)
     await session.execute(stmt)

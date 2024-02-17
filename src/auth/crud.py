@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import HTTPException, status
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
@@ -9,7 +9,6 @@ from src.auth.models import AuthUser
 from src.auth.schemas import CreateUserSchema, UserSchema
 
 
-# TODO добавить это в кэш.
 async def get_user(
     email: str,
     session: AsyncSession,
@@ -61,3 +60,12 @@ async def create_user(
         email=user.email,
         verified=user.verified,
     )
+
+
+async def verify_user_data(
+    user_id: uuid.UUID,
+    session: AsyncSession,
+):
+    stmt = update(AuthUser).values({"verified": True}).where(AuthUser.id == user_id)
+    await session.execute(stmt)
+    await session.commit()
