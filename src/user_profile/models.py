@@ -12,3 +12,4 @@ class UserProfile(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("auth_user.id", ondelete="CASCADE"), nullable=False)
     image_path: Mapped[str] = mapped_column(default="")
     # TODO написать путь до дефолтной фотографии
+    # TODO контакты, описание, увлечения, город

@@ -10,7 +10,7 @@ from redis.asyncio import Redis as AsyncRedis
 from src.auth import utils as auth_utils
 from src.auth.crud import get_user, create_user, get_user_by_id, verify_user_data
 from src.auth.models import AuthUser
-from src.auth.schemas import UserSchema, ResponseSchema, CreateUserSchema
+from src.auth.schemas import UserSchema, ResponseSchema, CreateUserSchema, LoginUserSchema
 from src.config import settings
 from src.database import get_async_session
 from src.email_settings import send_email
@@ -24,18 +24,17 @@ class AuthHandler:
     async def validate_auth_user(
         cls,
         session: Annotated[AsyncSession, Depends(get_async_session)],
-        email: str = Form(),
-        password: str = Form(),
+        user_data: LoginUserSchema,
     ) -> AuthUser:
         """Идентификация данных пользователя."""
         unauthenticated_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="invalid username or password",
         )
-        user = await get_user(email, session)
+        user = await get_user(user_data.email, session)
         cls._check_user_data(
             user=user,
-            user_password=password,
+            user_password=user_data.password,
             custom_exception=unauthenticated_exception,
         )
         return user
@@ -176,8 +175,9 @@ class AuthHandler:
         user: AuthUser,
     ) -> None:
         """Создание всех токенов пользователя."""
-        cls.create_access_token(response, user)
-        cls.create_refresh_token(response, user)
+        access_token = cls.create_access_token(response, user)
+        refresh_token = cls.create_refresh_token(response, user)
+        return {"access_token": access_token, "refresh_token": refresh_token, "user": UserSchema(**user.__dict__)}
 
     @staticmethod
     def delete_all_tokens(

@@ -55,7 +55,7 @@ async def recover_password(
     user: Annotated[UserSchema, Depends(current_user)],
 ) -> list[TeamPreviewSchema]:
     """Восстановление пароля пользователя"""
-
+# TODO сделать ручку для получения данных пользователя по его id
 
 # TODO подумать над названиями функций!!!
 @profile_router.get(
@@ -83,7 +83,7 @@ async def get_my_teams(
     """Получение команд пользователя."""
     return await crud.get_user_teams(user.id, session)
 
-
+# TODO убрать и использовать find/team/id
 @profile_router.get(
     "/my_team/{team_id}",
     response_model=TeamSchema,

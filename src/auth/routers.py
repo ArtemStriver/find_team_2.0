@@ -7,6 +7,7 @@ from fastapi import (
     status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import RedirectResponse
 
 from src.auth.auth_handler import AuthHandler, current_user
 from src.auth.schemas import (
@@ -48,59 +49,43 @@ async def register(
 
 @auth_router.post(
     "/login",
-    response_model=ResponseSchema,
+    response_model=dict,
     status_code=status.HTTP_200_OK,
 )
 async def login(
     response: Response,
     user: Annotated[LoginUserSchema, Depends(AuthHandler.validate_auth_user)],
-) -> ResponseSchema:
+) -> dict:
     """Проверка и вход пользователя c выдачей ему access и refresh token."""
-    AuthHandler.create_all_tokens(response, user)
-    return ResponseSchema(
-        status_code=status.HTTP_200_OK,
-        detail=user.username,
-    )
+    return AuthHandler.create_all_tokens(response, user)
 
 
 @auth_router.get(
     "/refresh",
-    response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
 async def refresh_token(
     response: Response,
     user: Annotated[UserSchema, Depends(AuthHandler.check_user_refresh_token)],
-) -> ResponseSchema:
+) -> dict:
     """Обновление access_token при наличии действующего refresh_token."""
-    AuthHandler.create_all_tokens(response, user)
-    return ResponseSchema(
-        status_code=status.HTTP_200_OK,
-        detail=user.username,
-    )
+    return AuthHandler.create_all_tokens(response, user)
 
 
 @auth_router.get(
     "/logout",
-    response_model=ResponseSchema,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def logout(
     response: Response,
-    user: Annotated[UserSchema, Depends(current_user)],
-) -> ResponseSchema:
+    # user: Annotated[UserSchema, Depends(current_user)],
+) -> None:
     """Выход пользователя c удалением файлов куки из браузера."""
     AuthHandler.delete_all_tokens(response)
-    username = user.username
-    return ResponseSchema(
-        status_code=status.HTTP_200_OK,
-        detail=f"Bye, {username}!",
-    )
 
 
-@auth_router.patch(
+@auth_router.get(
     "/verify/{token}",
-    response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
 async def verify(
@@ -111,7 +96,4 @@ async def verify(
     """Проверка подлинности email адреса пользователя."""
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
-    return ResponseSchema(
-        status_code=status.HTTP_200_OK,
-        detail=user.username,
-    )
+    return RedirectResponse("http://127.0.0.1:3000/home")

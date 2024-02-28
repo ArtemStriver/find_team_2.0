@@ -9,7 +9,7 @@ from src.auth.schemas import UserSchema
 
 class CreateTeamSchema(BaseModel):
     title: str
-    # type_team: str = "other"
+    type_team: str = "lifestyle"
     number_of_members: int = 1
     contacts: str
     description: str
@@ -21,7 +21,7 @@ class TeamSchema(BaseModel):
     id: uuid.UUID
     owner: uuid.UUID
     title: str
-    # type_team: str
+    type_team: str
     number_of_members: int
     contacts: str
     description: str
