@@ -10,8 +10,7 @@ class Settings(BaseSettings):
     DB_PASS: str
     DB_NAME: str
     DB_HOST: str
-    DB_PORT: int
-    CONTAINER_DB_PORT: int
+    DB_PORT: str
     TEST_DB_NAME: str
 
     REDIS_HOST: str
