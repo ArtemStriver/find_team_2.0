@@ -1,0 +1,7 @@
+.git/
+pg_data/
+.env
+#.env-example
+.gitignore
+venv/
+certs/

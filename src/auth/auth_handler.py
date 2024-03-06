@@ -1,16 +1,19 @@
+import uuid
 from typing import Annotated
 
 from fastapi import Depends, Form, HTTPException, Response, status
 from fastapi.security import APIKeyCookie
 from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
+from redis.asyncio import Redis as AsyncRedis
 
 from src.auth import utils as auth_utils
-from src.auth.crud import get_user
+from src.auth.crud import get_user, create_user, get_user_by_id, verify_user_data
 from src.auth.models import AuthUser
-from src.auth.schemas import UserSchema
+from src.auth.schemas import UserSchema, ResponseSchema, CreateUserSchema, LoginUserSchema
 from src.config import settings
 from src.database import get_async_session
+from src.email_settings import send_email
 
 
 class AuthHandler:
@@ -21,24 +24,23 @@ class AuthHandler:
     async def validate_auth_user(
         cls,
         session: Annotated[AsyncSession, Depends(get_async_session)],
-        email: str = Form(),
-        password: str = Form(),
+        user_data: LoginUserSchema,
     ) -> AuthUser:
         """Идентификация данных пользователя."""
         unauthenticated_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="invalid username or password",
         )
-        user = await get_user(email, session)
-        cls._verify_user(
+        user = await get_user(user_data.email, session)
+        cls._check_user_data(
             user=user,
-            user_password=password,
+            user_password=user_data.password,
             custom_exception=unauthenticated_exception,
         )
         return user
 
     @staticmethod
-    def _verify_user(
+    def _check_user_data(
         user: AuthUser,
         user_password: str | bytes,
         custom_exception: HTTPException,
@@ -135,7 +137,7 @@ class AuthHandler:
             "type": type_token,
         }
         token = auth_utils.encode_jwt(jwt_payload, expire_minutes=expires_time)
-        response.set_cookie(type_token, token)
+        response.set_cookie(type_token, token, httponly=True, secure=False)
         return token
 
     @classmethod
@@ -173,8 +175,9 @@ class AuthHandler:
         user: AuthUser,
     ) -> None:
         """Создание всех токенов пользователя."""
-        cls.create_access_token(response, user)
-        cls.create_refresh_token(response, user)
+        access_token = cls.create_access_token(response, user)
+        refresh_token = cls.create_refresh_token(response, user)
+        return {"access_token": access_token, "refresh_token": refresh_token, "user": UserSchema(**user.__dict__)}
 
     @staticmethod
     def delete_all_tokens(
@@ -184,5 +187,61 @@ class AuthHandler:
         response.delete_cookie(settings.COOKIE_ACCESS_TOKEN_KEY)
         response.delete_cookie(settings.COOKIE_REFRESH_TOKEN_KEY)
 
+    @classmethod
+    async def check_register_user(
+        cls,
+        user_data: CreateUserSchema,
+        session: AsyncSession,
+    ) -> bool:
+        if not (user := await get_user(user_data.email, session)):
+            return False
+        if not user.verified:
+            token = await cls.generate_email_token(user.id)
+            send_email(user.email, token)
+            return True
+
+    @classmethod
+    async def register_user(
+        cls,
+        user_data: CreateUserSchema,
+        session: AsyncSession,
+    ) -> None:
+        if not (user := await create_user(user_data, session)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="invalid user data",
+            )
+        token = await cls.generate_email_token(user.id)
+        send_email(user.email, token)
+
+    @staticmethod
+    async def generate_email_token(user_id):
+        token = uuid.uuid4().hex
+        redis_key = str(token)
+        await redis_client.set(redis_key, str(user_id), ex=600)
+        return redis_key
+
+    @staticmethod
+    async def verify_user_data(
+        token: str,
+        session: AsyncSession,
+    ) -> AuthUser:
+        if not (user_id := await redis_client.get(token)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="invalid data",
+            )
+
+        user = await get_user_by_id(user_id, session)
+        await verify_user_data(user_id, session)
+        await redis_client.delete(token)
+        return user
+
 
 current_user = AuthHandler.get_auth_user
+
+redis_client = AsyncRedis.from_url(
+    url=settings.db_url_redis,
+    db=0,
+    decode_responses=True,
+)

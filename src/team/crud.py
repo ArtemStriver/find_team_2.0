@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.auth.schemas import ResponseSchema, UserSchema
+from src.find.crud import get_team_data
 from src.team.models import Team, application_to_join_table, team_members_table
-from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema
+from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema, MemberSchema
 
 
 async def create_team(
@@ -16,11 +17,6 @@ async def create_team(
     user: UserSchema,
 ) -> ResponseSchema:
     """Создание команды."""
-    if user_team := await get_user_team(user_id=user.id, session=session):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"user {user.username} already have one team {user_team.title}",
-        )
     full_team_data = {"owner": user.id, **team_data.model_dump()}
     stmt = insert(Team).values(**full_team_data)
     await session.execute(stmt)
@@ -68,7 +64,7 @@ async def delete_team(
     user: UserSchema,
 ) -> ResponseSchema:
     """Удаление команды."""
-    if not (team := await get_user_team(user_id=user.id, session=session)):
+    if not (team := await get_team_data(team_id=team_id, session=session)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="there is no such team",
@@ -88,18 +84,24 @@ async def delete_team(
     )
 
 
-async def get_user_team(
-    user_id: uuid.UUID,
+async def get_members_list(
+    team_id: uuid.UUID,
+    user: UserSchema,
     session: AsyncSession,
-) -> TeamSchema | None:
-    """Получение команды пользователя."""
-    query = (
-        select(Team)
-        .options(selectinload(Team.members))
-        .where(Team.owner == user_id)
-    )
-    user_team = await session.execute(query)
-    return user_team.unique().scalar_one_or_none()
+) -> list[MemberSchema]:
+    """Получение список участников команды."""
+    query = select(Team).where(Team.id == team_id)
+    result = await session.execute(query)
+    if result.scalar_one_or_none().owner == user.id:
+        query = select(team_members_table).where(team_members_table.c.team_id == team_id)
+        result = await session.execute(query)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="no access",
+        ) from None
+    return result.all()
+# TODO убрать дублирование кода и настроить релейшеншипс для отображения данных пользователя.
 
 
 async def get_application_list(

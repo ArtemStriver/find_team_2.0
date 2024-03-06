@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, String, Table
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -23,14 +25,6 @@ application_to_join_table = Table(
 )
 
 
-# TODO продумать какие типы команд (для каких целей) будут необходимы
-# class TypeTeam(Enum):
-#     sport = "sport"
-#     study = "study"
-#     fun = "fun"
-#     other = "other"
-
-
 class Team(Base):
     """Модель команды"""
     __tablename__ = "team"
@@ -40,12 +34,13 @@ class Team(Base):
         ForeignKey("auth_user.id", ondelete="CASCADE"),
         nullable=False,
     )
+    # TODO имена команд сделать не уникальные!
     title: Mapped[str] = mapped_column(
         String(length=50),
         unique=True,
         nullable=False,
     )
-    # type_team: Mapped[Optional[TypeTeam]]
+    type_team: Mapped[str] = mapped_column(nullable=False)
     number_of_members: Mapped[int] = mapped_column(nullable=False)  # количество необходимого числа участников команды
     # TODO продумать тип данных для контактов и какие данные будут там находиться, мб настроить relationship
     contacts: Mapped[str] = mapped_column(nullable=False)
@@ -55,6 +50,7 @@ class Team(Base):
     tags: Mapped[Optional[str]] = mapped_column(nullable=True)
     # TODO сделать дефолтное значение дедлайна now + 1 день (хотя можно еще обсудить какое значение ставить)
     deadline_at: Mapped[datetime] = mapped_column(nullable=False)
+    # TODO может изменить на просто дату?
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 

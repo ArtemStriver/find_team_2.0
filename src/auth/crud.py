@@ -1,5 +1,7 @@
+import uuid
+
 from fastapi import HTTPException, status
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
@@ -7,13 +9,22 @@ from src.auth.models import AuthUser
 from src.auth.schemas import CreateUserSchema, UserSchema
 
 
-# TODO добавить это в кэш.
 async def get_user(
     email: str,
     session: AsyncSession,
 ) -> AuthUser:
     """Получение данных o пользователе из БД по email."""
     query = select(AuthUser).where(AuthUser.email == email)
+    result = await session.execute(query)
+    return result.scalar_one_or_none()
+
+
+async def get_user_by_id(
+    user_id: uuid.UUID,
+    session: AsyncSession,
+) -> AuthUser:
+    """Получение данных o пользователе из БД по id."""
+    query = select(AuthUser).where(AuthUser.id == user_id)
     result = await session.execute(query)
     return result.scalar_one_or_none()
 
@@ -38,7 +49,6 @@ async def create_user(
             "username": user_data.username,
             "email": user_data.email,
             "hashed_password": auth_utils.hash_password(user_data.hashed_password),
-            "verified": user_data.verified,
         },
     )
     await session.execute(stmt)
@@ -50,3 +60,12 @@ async def create_user(
         email=user.email,
         verified=user.verified,
     )
+
+
+async def verify_user_data(
+    user_id: uuid.UUID,
+    session: AsyncSession,
+):
+    stmt = update(AuthUser).values({"verified": True}).where(AuthUser.id == user_id)
+    await session.execute(stmt)
+    await session.commit()

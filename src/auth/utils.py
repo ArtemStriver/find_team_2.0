@@ -33,7 +33,7 @@ def decode_jwt(
     algorithm: str = settings.ALGORITHM,
 ) -> dict:
     """Декодировка JWT токена в данные."""
-    return  jwt.decode(
+    return jwt.decode(
         token,
         public_key,
         algorithms=[algorithm],

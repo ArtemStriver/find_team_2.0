@@ -9,7 +9,7 @@ class UserSchema(BaseModel):
     id: uuid.UUID
     username: str | None = None
     email: EmailStr
-    verified: bool = True
+    verified: bool
 
 
 class CreateUserSchema(BaseModel):
@@ -17,7 +17,6 @@ class CreateUserSchema(BaseModel):
     email: EmailStr
     hashed_password: Annotated[str, MinLen(6), MaxLen(24)]
     confirmed_password: str
-    verified: bool = True
 
 
 class LoginUserSchema(BaseModel):
