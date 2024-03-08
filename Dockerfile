@@ -14,6 +14,3 @@ RUN mkdir certs
 
 RUN openssl genrsa -out certs/jwt-private.pem 2048
 RUN openssl rsa -in certs/jwt-private.pem -outform PEM -pubout -out certs/jwt-public.pem
-
-
-RUN chmod a+x docker/*.sh

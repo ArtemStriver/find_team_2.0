@@ -1,11 +1,10 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.auth_handler import current_user
-from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema
 from src.database import get_async_session
 from src.find.schemas import TeamPreviewSchema
@@ -17,9 +16,7 @@ profile_router = APIRouter(
     tags=["Profile"],
 )
 
-"""
-Логика профиля пользователя. 
-"""
+"""Логика профиля пользователя."""
 
 
 @profile_router.patch(
@@ -83,7 +80,7 @@ async def get_my_teams(
     """Получение команд пользователя."""
     return await crud.get_user_teams(user.id, session)
 
-# TODO убрать и использовать find/team/id
+# TODO убрать и использовать find/team/id ??? Отличие только в проверке на причастность команды пользователю
 @profile_router.get(
     "/my_team/{team_id}",
     response_model=TeamSchema,

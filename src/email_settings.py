@@ -4,9 +4,9 @@ from email.message import EmailMessage
 
 def get_email(user_email: str, token: str):
     email = EmailMessage()
-    email['Subject'] = "Подтверждение регистрации"
-    email['From'] = "artemstriver@gmail.com"
-    email['To'] = user_email
+    email["Subject"] = "Подтверждение регистрации"
+    email["From"] = "artemstriver@gmail.com"
+    email["To"] = user_email
 
     email.set_content(
         # TODO исправить текст сообщения + ссылка не работает!!!!

@@ -1,15 +1,14 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.auth_handler import current_user
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.database import get_async_session
-from src.find.schemas import TeamPreviewSchema
 from src.team import crud
-from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema, MemberSchema
+from src.team.schemas import ApplicationSchema, CreateTeamSchema, MemberSchema
 
 team_router = APIRouter(
     prefix="/team",
@@ -51,7 +50,7 @@ async def update_team(
     return await crud.update_team(team_id, update_data, session, user)
 
 
-# TODO надо организовать автоматическое удаление команды по истечению дедлайна + пара часов или день.
+# TODO надо организовать автоматическое удаление команды по истечению дедлайна + пара часов или день. ???
 @team_router.delete(
     "/delete/{team_id}",
     response_model=ResponseSchema,

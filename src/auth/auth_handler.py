@@ -1,16 +1,16 @@
 import uuid
 from typing import Annotated
 
-from fastapi import Depends, Form, HTTPException, Response, status
+from fastapi import Depends, HTTPException, Response, status
 from fastapi.security import APIKeyCookie
 from jwt import InvalidTokenError
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis as AsyncRedis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
-from src.auth.crud import get_user, create_user, get_user_by_id, verify_user_data
+from src.auth.crud import create_user, get_user, get_user_by_id, verify_user_data
 from src.auth.models import AuthUser
-from src.auth.schemas import UserSchema, ResponseSchema, CreateUserSchema, LoginUserSchema
+from src.auth.schemas import CreateUserSchema, LoginUserSchema, UserSchema
 from src.config import settings
 from src.database import get_async_session
 from src.email_settings import send_email
@@ -215,7 +215,7 @@ class AuthHandler:
         send_email(user.email, token)
 
     @staticmethod
-    async def generate_email_token(user_id):
+    async def generate_email_token(user_id: str | uuid.UUID):
         token = uuid.uuid4().hex
         redis_key = str(token)
         await redis_client.set(redis_key, str(user_id), ex=600)
