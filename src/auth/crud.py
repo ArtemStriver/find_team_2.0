@@ -49,6 +49,8 @@ async def create_user(
             "username": user_data.username,
             "email": user_data.email,
             "hashed_password": auth_utils.hash_password(user_data.hashed_password),
+            # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
+            "verified": True,
         },
     )
     await session.execute(stmt)

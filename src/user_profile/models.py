@@ -9,6 +9,7 @@ from src.database import Base
 class UserProfile(Base):
     """Модель профиля"""
     __tablename__ = "user_profile"
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("auth_user.id", ondelete="CASCADE"), nullable=False)
     image_path: Mapped[str] = mapped_column(default="")
     # TODO написать путь до дефолтной фотографии

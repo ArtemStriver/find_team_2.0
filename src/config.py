@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     TEST_DB_NAME: str
+    CONTAINER_DB_PORT: str
+    CONTAINER_REDIS_PORT: int
+    POSTGRES_DB: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
 
     REDIS_HOST: str
     REDIS_PORT: int

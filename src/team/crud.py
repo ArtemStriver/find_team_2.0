@@ -3,12 +3,11 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy import and_, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.find.crud import get_team_data
 from src.team.models import Team, application_to_join_table, team_members_table
-from src.team.schemas import ApplicationSchema, CreateTeamSchema, TeamSchema, MemberSchema
+from src.team.schemas import ApplicationSchema, CreateTeamSchema, MemberSchema
 
 
 async def create_team(

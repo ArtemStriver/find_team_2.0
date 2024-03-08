@@ -1,11 +1,9 @@
 import uuid
 
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.auth.crud import get_user
-from src.auth.models import AuthUser
 from src.team.models import Team, team_members_table
 from src.team.schemas import TeamSchema
 
@@ -55,7 +53,7 @@ async def get_user_team(
             and_(
                 Team.id == team_id,
                 Team.owner == user_id,
-            )
+            ),
         )
     )
     user_team = await session.execute(query)

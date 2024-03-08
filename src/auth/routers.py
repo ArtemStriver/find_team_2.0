@@ -6,10 +6,10 @@ from fastapi import (
     Response,
     status,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.auth_handler import AuthHandler, current_user
+from src.auth.auth_handler import AuthHandler
 from src.auth.schemas import (
     CreateUserSchema,
     LoginUserSchema,
@@ -39,12 +39,11 @@ async def register(
             status_code=status.HTTP_200_OK,
             detail="message was sent again",
         )
-    else:
-        await AuthHandler.register_user(user_data, session)
-        return ResponseSchema(
-            status_code=status.HTTP_201_CREATED,
-            detail="to complete the registration, confirm your emai",
-        )
+    await AuthHandler.register_user(user_data, session)
+    return ResponseSchema(
+        status_code=status.HTTP_201_CREATED,
+        detail="to complete the registration, confirm your emai",
+    )
 
 
 @auth_router.post(
@@ -78,7 +77,6 @@ async def refresh_token(
 )
 async def logout(
     response: Response,
-    # user: Annotated[UserSchema, Depends(current_user)],
 ) -> None:
     """Выход пользователя c удалением файлов куки из браузера."""
     AuthHandler.delete_all_tokens(response)

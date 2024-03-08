@@ -6,9 +6,9 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.config import settings
-# TODO импортировать все новые модели для корректной работы alembic
 from src.auth.models import AuthUser # noqa
 from src.team.models import Team # noqa
+from src.user_profile.models import UserProfile # noqa
 from src.database import Base
 
 config = context.config

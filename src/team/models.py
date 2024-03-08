@@ -1,10 +1,8 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, String, Table
-from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -34,19 +32,17 @@ class Team(Base):
         ForeignKey("auth_user.id", ondelete="CASCADE"),
         nullable=False,
     )
-    # TODO имена команд сделать не уникальные!
     title: Mapped[str] = mapped_column(
         String(length=50),
-        unique=True,
         nullable=False,
     )
-    type_team: Mapped[str] = mapped_column(nullable=False)
-    number_of_members: Mapped[int] = mapped_column(nullable=False)  # количество необходимого числа участников команды
+    type_team: Mapped[str] = mapped_column(nullable=False, default="lifestyle")
+    number_of_members: Mapped[int] = mapped_column(nullable=False)
     # TODO продумать тип данных для контактов и какие данные будут там находиться, мб настроить relationship
     contacts: Mapped[str] = mapped_column(nullable=False)
     # TODO подумать, может добавить мини описание или сделать как отрывок из главного описания.
     description: Mapped[str] = mapped_column(nullable=False)
-    # TODO сделать фиксированное количество тегов и чтобы они заполнялись как как в словарь - одинаково.
+    # TODO сделать фиксированное количество тегов и чтобы они заполнялись как в словарь - одинаково.
     tags: Mapped[Optional[str]] = mapped_column(nullable=True)
     # TODO сделать дефолтное значение дедлайна now + 1 день (хотя можно еще обсудить какое значение ставить)
     deadline_at: Mapped[datetime] = mapped_column(nullable=False)
