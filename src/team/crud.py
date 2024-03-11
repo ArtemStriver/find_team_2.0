@@ -42,6 +42,7 @@ async def update_team(
             "description": update_data.description,
             "tags": update_data.tags,
             "deadline_at": update_data.deadline_at,
+            "city": update_data.city,
         })
         .where(and_(
             Team.id == team_id,

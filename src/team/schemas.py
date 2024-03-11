@@ -15,6 +15,7 @@ class CreateTeamSchema(BaseModel):
     description: str
     tags: str
     deadline_at: datetime
+    city: str = "Интернет"
 
 
 class TeamSchema(BaseModel):
@@ -27,6 +28,7 @@ class TeamSchema(BaseModel):
     description: str
     tags: str
     deadline_at: datetime
+    city: str
     created_at: datetime
     updated_at: datetime
     members: Optional[list[UserSchema]]

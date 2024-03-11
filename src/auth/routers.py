@@ -17,6 +17,7 @@ from src.auth.schemas import (
     UserSchema,
 )
 from src.database import get_async_session
+from src.user_profile.crud import create_profile
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -42,7 +43,7 @@ async def register(
     await AuthHandler.register_user(user_data, session)
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
-        detail="to complete the registration, confirm your emai",
+        detail="to complete the registration, confirm your email",
     )
 
 
@@ -94,4 +95,5 @@ async def verify(
     """Проверка подлинности email адреса пользователя."""
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
+    await create_profile(user, session)
     return RedirectResponse("http://127.0.0.1:3000/home")

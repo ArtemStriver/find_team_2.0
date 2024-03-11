@@ -10,6 +10,7 @@ from src.database import get_async_session
 from src.find.schemas import TeamPreviewSchema
 from src.team.schemas import TeamSchema
 from src.user_profile import crud
+from src.user_profile.schemas import UserProfileSchema
 
 profile_router = APIRouter(
     prefix="/profile",
@@ -19,28 +20,55 @@ profile_router = APIRouter(
 """Логика профиля пользователя."""
 
 
-@profile_router.patch(
-    "/photo",
+# @profile_router.patch(
+#     "/photo",
+#     status_code=status.HTTP_200_OK,
+# )
+# async def change_photo(
+#     session: Annotated[AsyncSession, Depends(get_async_session)],
+#     user: Annotated[UserSchema, Depends(current_user)],
+# ):
+#     """Обновление фото пользователя
+#     (вместо дефолтного установить загруженное пользователем,
+#     при изменении - новое установить, старо удалить)."""
+@profile_router.get(
+    "/profile",
+    response_model=UserProfileSchema,
     status_code=status.HTTP_200_OK,
 )
-async def change_photo(
+async def profile(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-):
-    """Обновление фото пользователя
-    (вместо дефолтного установить загруженное пользователем,
-    при изменении - новое установить, старо удалить)."""
+) -> UserProfileSchema:
+    """Получение данных профиля пользователя."""
+    if (user_profile := await crud.get_profile(user.id, session)) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="there is no such profile",
+        )
+    return user_profile
 
 
 @profile_router.patch(
-    "/change_password",
+    "/change_profile",
     status_code=status.HTTP_200_OK,
 )
-async def change_password(
+async def change_profile(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
 ):
-    """Изменение пароля пользователя"""
+    """Изменение профиля пользователя."""
+
+
+@profile_router.patch(
+    "/delete_profile",
+    status_code=status.HTTP_200_OK,
+)
+async def delete_profile(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: Annotated[UserSchema, Depends(current_user)],
+):
+    """Удалить профиля пользователя и его данные."""
 
 
 @profile_router.post(
@@ -53,6 +81,7 @@ async def recover_password(
 ) -> list[TeamPreviewSchema]:
     """Восстановление пароля пользователя"""
 # TODO сделать ручку для получения данных пользователя по его id
+
 
 # TODO подумать над названиями функций!!!
 @profile_router.get(

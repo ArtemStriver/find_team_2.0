@@ -42,11 +42,12 @@ class Team(Base):
     contacts: Mapped[str] = mapped_column(nullable=False)
     # TODO подумать, может добавить мини описание или сделать как отрывок из главного описания.
     description: Mapped[str] = mapped_column(nullable=False)
+    # TODO сделать дефолтное значение дедлайна now + 1 день (хотя можно еще обсудить какое значение ставить)
+    # TODO может изменить на просто дату?
+    deadline_at: Mapped[datetime] = mapped_column(nullable=False)
+    city: Mapped[str] = mapped_column(nullable=False, default="Moscow")
     # TODO сделать фиксированное количество тегов и чтобы они заполнялись как в словарь - одинаково.
     tags: Mapped[Optional[str]] = mapped_column(nullable=True)
-    # TODO сделать дефолтное значение дедлайна now + 1 день (хотя можно еще обсудить какое значение ставить)
-    deadline_at: Mapped[datetime] = mapped_column(nullable=False)
-    # TODO может изменить на просто дату?
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
