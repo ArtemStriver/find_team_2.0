@@ -23,7 +23,7 @@ async def get_user(
 async def get_user_by_id(
     user_id: uuid.UUID,
     session: AsyncSession,
-) -> AuthUser:
+) -> AuthUser | None:
     """Получение данных o пользователе из БД по id."""
     query = select(AuthUser).where(AuthUser.id == user_id)
     result = await session.execute(query)

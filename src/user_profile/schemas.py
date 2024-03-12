@@ -11,3 +11,12 @@ class UserProfileSchema(BaseModel):
     description: str
     hobby: str
     city: str | None
+
+
+class UpdateProfileSchema(BaseModel):
+    username: str
+    image_path: str
+    contacts: str
+    description: str
+    hobby: str
+    city: str

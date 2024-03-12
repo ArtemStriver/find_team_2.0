@@ -22,7 +22,7 @@ async def create_team(
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
-        detail="team is created",
+        detail="team created",
     )
 
 
@@ -54,7 +54,7 @@ async def update_team(
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="team is updated",
+        detail="team updated",
     )
 
 
@@ -80,7 +80,7 @@ async def delete_team(
         )
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="team is deleted",
+        detail="team deleted",
     )
 
 
@@ -161,7 +161,7 @@ async def remove_application_of_comrade(
         await session.commit()
         return ResponseSchema(
             status_code=status.HTTP_200_OK,
-            detail="comrade's application is rejected",
+            detail="comrade's application rejected",
         )
     except Exception:  # noqa: BLE001
         raise HTTPException(
@@ -210,5 +210,5 @@ async def exclude_comrade_from_team(
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="comrade is excluded",
+        detail="comrade excluded",
     )
