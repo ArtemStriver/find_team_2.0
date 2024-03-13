@@ -38,11 +38,11 @@ async def update_team(
         .values({
             "title": update_data.title,
             "number_of_members": update_data.number_of_members,
-            "contacts": update_data.contacts,
-            "description": update_data.description,
-            "tags": update_data.tags,
-            "deadline_at": update_data.deadline_at,
-            "city": update_data.city,
+            "team_contacts": update_data.team_contacts,
+            "team_description": update_data.team_description,
+            "team_tags": update_data.team_tags,
+            "team_deadline_at": update_data.team_deadline_at,
+            "team_city": update_data.team_city,
         })
         .where(and_(
             Team.id == team_id,

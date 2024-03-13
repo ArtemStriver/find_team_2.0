@@ -11,11 +11,11 @@ class CreateTeamSchema(BaseModel):
     title: str
     type_team: str = "lifestyle"
     number_of_members: int = 1
-    contacts: str
-    description: str
-    tags: str
-    deadline_at: datetime
-    city: str = "Интернет"
+    team_contacts: str
+    team_description: str
+    team_tags: str
+    team_deadline_at: datetime
+    team_city: str = "Интернет"
 
 
 class TeamSchema(BaseModel):
@@ -24,11 +24,11 @@ class TeamSchema(BaseModel):
     title: str
     type_team: str
     number_of_members: int
-    contacts: str
-    description: str
-    tags: str
-    deadline_at: datetime
-    city: str
+    team_contacts: str
+    team_description: str
+    team_tags: str
+    team_deadline_at: datetime
+    team_city: str
     created_at: datetime
     updated_at: datetime
     members: Optional[list[UserSchema]]

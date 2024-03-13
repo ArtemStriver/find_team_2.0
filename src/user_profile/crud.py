@@ -5,7 +5,6 @@ from sqlalchemy import and_, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.auth.auth_handler import AuthHandler
 from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema, ResponseSchema
 from src.team.models import Team, team_members_table
@@ -87,7 +86,10 @@ async def delete_profile(
     await session.execute(stmt_profile)
     await session.execute(stmt_user)
     await session.commit()
+
+    from src.auth.auth_handler import AuthHandler
     AuthHandler.delete_all_tokens(response)
+
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
         detail="user and his profile deleted",
