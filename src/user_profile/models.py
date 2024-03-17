@@ -16,5 +16,8 @@ class UserProfile(Base):
     description: Mapped[str] = mapped_column(nullable=False)
     # TODO увлечения будут выбираться из фиксированного списка, храниться через пробел, плюс переименовать на hobbies.
     hobby: Mapped[str] = mapped_column(String(length=50), nullable=False)
+
+
+    # TODO удалить город из профиля, изменить username на уникальные ники и добавить возможность логиниться по нику.
+    # TODO плюс прибрать код и провести ручное тестирование.
     city: Mapped[str] = mapped_column(nullable=True)
-    # TODO контакты, описание, увлечения, город

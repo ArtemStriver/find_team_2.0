@@ -8,12 +8,12 @@ from redis.asyncio import Redis as AsyncRedis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
-from src.auth.crud import create_user, get_user, get_user_by_id, verify_user_data
+from src.auth.crud import create_user, get_user, get_user_by_id, verify_user_data, change_password
 from src.auth.models import AuthUser
-from src.auth.schemas import CreateUserSchema, LoginUserSchema, UserSchema
+from src.auth.schemas import CreateUserSchema, LoginUserSchema, UserSchema, ResponseSchema, PasswordChangeSchema
 from src.config import settings
 from src.database import get_async_session
-from src.email_settings import send_email
+from src.email_settings import send_email, send_email_for_recover_password
 
 
 class AuthHandler:
@@ -218,7 +218,7 @@ class AuthHandler:
     async def generate_email_token(user_id: str | uuid.UUID):
         token = uuid.uuid4().hex
         redis_key = str(token)
-        await redis_client.set(redis_key, str(user_id), ex=600)
+        await redis_client.set(redis_key, str(user_id), ex=900)
         return redis_key
 
     @staticmethod
@@ -236,6 +236,38 @@ class AuthHandler:
         await verify_user_data(user_id, session)
         await redis_client.delete(token)
         return user
+
+    @classmethod
+    async def recover_password(
+        cls,
+        email: str,
+        session: AsyncSession,
+    ) -> ResponseSchema:
+        if not (user := await get_user(email, session)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="there is no user with this email",
+            )
+        token = await cls.generate_email_token(user.id)
+        send_email_for_recover_password(email, token)
+        return ResponseSchema(
+            status_code=status.HTTP_201_CREATED,
+            detail="the link for password recovery has been sent to the specified email",
+        )
+
+    @staticmethod
+    async def change_user_password(
+        token: str,
+        password_data: PasswordChangeSchema,
+        session: AsyncSession,
+    ) -> None:
+        if not (user_id := await redis_client.get(token)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="invalid data",
+            )
+        await change_password(user_id, password_data, session)
+        await redis_client.delete(token)
 
 
 current_user = AuthHandler.get_auth_user

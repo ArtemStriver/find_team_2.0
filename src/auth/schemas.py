@@ -27,3 +27,8 @@ class LoginUserSchema(BaseModel):
 class ResponseSchema(BaseModel):
     status_code: int
     detail: str
+
+
+class PasswordChangeSchema(BaseModel):
+    hashed_password: Annotated[str, MinLen(6), MaxLen(24)]
+    confirmed_password: str

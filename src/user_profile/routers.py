@@ -67,18 +67,6 @@ async def delete_profile(
     return await crud.delete_profile(user, session, response)
 
 
-@profile_router.post(
-    "/password_recovery",
-    status_code=status.HTTP_200_OK,
-)
-async def recover_password(
-    session: Annotated[AsyncSession, Depends(get_async_session)],
-    user: Annotated[UserSchema, Depends(current_user)],
-) -> list[TeamPreviewSchema]:
-    """Восстановление пароля пользователя"""
-# TODO сделать ручку для получения данных пользователя по его id
-
-
 # TODO подумать над названиями функций!!!
 @profile_router.get(
     "/teams",

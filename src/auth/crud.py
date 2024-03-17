@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
 from src.auth.models import AuthUser
-from src.auth.schemas import CreateUserSchema, UserSchema
+from src.auth.schemas import CreateUserSchema, UserSchema, PasswordChangeSchema
 from src.user_profile.crud import create_profile
 
 
@@ -73,5 +73,22 @@ async def verify_user_data(
     session: AsyncSession,
 ):
     stmt = update(AuthUser).values({"verified": True}).where(AuthUser.id == user_id)
+    await session.execute(stmt)
+    await session.commit()
+
+
+async def change_password(
+    user_id: uuid.UUID | str,
+    password_data: PasswordChangeSchema,
+    session: AsyncSession,
+) -> None:
+    if not password_data.hashed_password == password_data.confirmed_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="passwords are different",
+        )
+    stmt = update(AuthUser).values({
+        "hashed_password": auth_utils.hash_password(password_data.hashed_password),
+    }).where(AuthUser.id == user_id)
     await session.execute(stmt)
     await session.commit()
