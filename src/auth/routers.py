@@ -14,9 +14,10 @@ from src.auth.schemas import (
     CreateUserSchema,
     LoginUserSchema,
     ResponseSchema,
-    UserSchema,
+    UserSchema, PasswordChangeSchema,
 )
 from src.database import get_async_session
+from src.user_profile.crud import create_profile
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -42,7 +43,7 @@ async def register(
     await AuthHandler.register_user(user_data, session)
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
-        detail="to complete the registration, confirm your emai",
+        detail="to complete the registration, confirm your email",
     )
 
 
@@ -94,4 +95,37 @@ async def verify(
     """Проверка подлинности email адреса пользователя."""
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
+    await create_profile(user, session)
     return RedirectResponse("http://127.0.0.1:3000/home")
+
+
+@auth_router.post(
+    "/password_recovery",
+    response_model=ResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def recover_password(
+    email: str,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> ResponseSchema:
+    """Восстановление пароля пользователя"""
+    return await AuthHandler.recover_password(email, session)
+
+
+@auth_router.post(
+    "/change_password/{token}",
+    response_model=ResponseSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def recover_password(
+    token: str,
+    password_data: PasswordChangeSchema,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> ResponseSchema:
+    """Изменить пароль пользователя"""
+    await AuthHandler.change_user_password(token, password_data, session)
+    # TODO RedirectResponse("http://127.0.0.1:3000/home")
+    return ResponseSchema(
+        status_code=status.HTTP_201_CREATED,
+        detail="the password has been changed",
+    )

@@ -9,5 +9,5 @@ class TeamPreviewSchema(BaseModel):
     title: str
     type_team: str
     number_of_members: int
-    tags: str
-    deadline_at: datetime
+    team_tags: str
+    team_deadline_at: datetime

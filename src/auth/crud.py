@@ -6,23 +6,29 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
 from src.auth.models import AuthUser
-from src.auth.schemas import CreateUserSchema, UserSchema
+from src.auth.schemas import CreateUserSchema, UserSchema, PasswordChangeSchema
+from src.user_profile.crud import create_profile
 
 
 async def get_user(
     email: str,
     session: AsyncSession,
 ) -> AuthUser:
-    """Получение данных o пользователе из БД по email."""
-    query = select(AuthUser).where(AuthUser.email == email)
-    result = await session.execute(query)
+    """Получение данных o пользователе из БД по email или username."""
+    if "@" in email:
+        query = select(AuthUser).where(AuthUser.email == email)
+        result = await session.execute(query)
+    else:
+        username = email
+        query = select(AuthUser).where(AuthUser.username == username)
+        result = await session.execute(query)
     return result.scalar_one_or_none()
 
 
 async def get_user_by_id(
     user_id: uuid.UUID,
     session: AsyncSession,
-) -> AuthUser:
+) -> AuthUser | None:
     """Получение данных o пользователе из БД по id."""
     query = select(AuthUser).where(AuthUser.id == user_id)
     result = await session.execute(query)
@@ -34,7 +40,7 @@ async def create_user(
     session: AsyncSession,
 ) -> AuthUser:
     """Создание пользователя в БД."""
-    if await get_user(user_data.email, session):
+    if await get_user(user_data.email, session) or await get_user(user_data.username, session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="register user already exists",
@@ -56,6 +62,9 @@ async def create_user(
     await session.execute(stmt)
     user = await get_user(user_data.email, session)
     await session.commit()
+    # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
+    await create_profile(user, session)
+    # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
     return UserSchema(
         id=user.id,
         username=user.username,
@@ -69,5 +78,22 @@ async def verify_user_data(
     session: AsyncSession,
 ):
     stmt = update(AuthUser).values({"verified": True}).where(AuthUser.id == user_id)
+    await session.execute(stmt)
+    await session.commit()
+
+
+async def change_password(
+    user_id: uuid.UUID | str,
+    password_data: PasswordChangeSchema,
+    session: AsyncSession,
+) -> None:
+    if not password_data.hashed_password == password_data.confirmed_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="passwords are different",
+        )
+    stmt = update(AuthUser).values({
+        "hashed_password": auth_utils.hash_password(password_data.hashed_password),
+    }).where(AuthUser.id == user_id)
     await session.execute(stmt)
     await session.commit()
