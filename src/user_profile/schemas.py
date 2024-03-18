@@ -9,8 +9,7 @@ class UserProfileSchema(BaseModel):
     image_path: str
     contacts: str
     description: str
-    hobby: str
-    city: str | None
+    hobbies: str
 
 
 class UpdateProfileSchema(BaseModel):
@@ -18,5 +17,4 @@ class UpdateProfileSchema(BaseModel):
     image_path: str
     contacts: str
     description: str
-    hobby: str
-    city: str
+    hobbies: str

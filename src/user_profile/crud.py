@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from fastapi import status, HTTPException, Response
 from sqlalchemy import and_, select, insert, update, delete
@@ -33,7 +34,7 @@ async def create_profile(
                 "image_path": "images/default.jpg",
                 "contacts": user.email,
                 "description": "Your description",
-                "hobby": "Sport, Lifestyle, Work",
+                "hobbies": "Sport, Lifestyle, Work",
             }
         )
         await session.execute(stmt)
@@ -49,13 +50,21 @@ async def change_profile(
         "image_path": updated_data.image_path,
         "contacts": updated_data.contacts,
         "description": updated_data.contacts,
-        "hobby": updated_data.hobby,
-        "city": updated_data.city,
+        "hobbies": updated_data.hobbies,
     }).where(and_(
         UserProfile.user_id == user.id,
     ))
+
+    from src.auth.crud import get_user
+    user_data = await get_user(updated_data.username, session)
+    if user_data and user_data.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="user with that name already exists",
+        )
     stmt_user = update(AuthUser).values({
         "username": updated_data.username,
+        # TODO "updated_at": datetime.utcnow,
     }).where(
         AuthUser.id == user.id,
     )

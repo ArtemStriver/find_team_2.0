@@ -14,9 +14,14 @@ async def get_user(
     email: str,
     session: AsyncSession,
 ) -> AuthUser:
-    """Получение данных o пользователе из БД по email."""
-    query = select(AuthUser).where(AuthUser.email == email)
-    result = await session.execute(query)
+    """Получение данных o пользователе из БД по email или username."""
+    if "@" in email:
+        query = select(AuthUser).where(AuthUser.email == email)
+        result = await session.execute(query)
+    else:
+        username = email
+        query = select(AuthUser).where(AuthUser.username == username)
+        result = await session.execute(query)
     return result.scalar_one_or_none()
 
 
@@ -35,7 +40,7 @@ async def create_user(
     session: AsyncSession,
 ) -> AuthUser:
     """Создание пользователя в БД."""
-    if await get_user(user_data.email, session):
+    if await get_user(user_data.email, session) or await get_user(user_data.username, session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="register user already exists",

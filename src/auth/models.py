@@ -13,7 +13,12 @@ class AuthUser(Base):
     __tablename__ = "auth_user"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    username: Mapped[str] = mapped_column(nullable=True)
+    username: Mapped[str] = mapped_column(
+        String(length=50),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
     email: Mapped[str] = mapped_column(
         String(length=50),
         unique=True,

@@ -93,6 +93,7 @@ async def get_my_teams(
     """Получение команд пользователя."""
     return await crud.get_user_teams(user.id, session)
 
+
 # TODO убрать и использовать find/team/id ??? Отличие только в проверке на причастность команды пользователю
 @profile_router.get(
     "/my_team/{team_id}",

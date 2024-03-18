@@ -7,20 +7,20 @@ from pydantic import BaseModel, EmailStr
 
 class UserSchema(BaseModel):
     id: uuid.UUID
-    username: str | None = None
+    username: str
     email: EmailStr
     verified: bool
 
 
 class CreateUserSchema(BaseModel):
-    username: str | None = None
+    username: str
     email: EmailStr
     hashed_password: Annotated[str, MinLen(6), MaxLen(24)]
     confirmed_password: str
 
 
 class LoginUserSchema(BaseModel):
-    email: EmailStr
+    email: EmailStr | str
     password: str
 
 
