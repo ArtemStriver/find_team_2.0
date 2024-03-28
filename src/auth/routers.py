@@ -17,7 +17,7 @@ from src.auth.schemas import (
     UserSchema, PasswordChangeSchema,
 )
 from src.database import get_async_session
-from src.user_profile.crud import create_profile
+from src.user_profile.crud import create_user_profile
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -95,7 +95,7 @@ async def verify(
     """Проверка подлинности email адреса пользователя."""
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
-    await create_profile(user, session)
+    await create_user_profile(user, session)
     return RedirectResponse("http://127.0.0.1:3000/home")
 
 
@@ -124,7 +124,7 @@ async def recover_password(
 ) -> ResponseSchema:
     """Изменить пароль пользователя"""
     await AuthHandler.change_user_password(token, password_data, session)
-    # TODO RedirectResponse("http://127.0.0.1:3000/home")
+    # TODO RedirectResponse("http://127.0.0.1:3000/home") - на митап
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
         detail="the password has been changed",

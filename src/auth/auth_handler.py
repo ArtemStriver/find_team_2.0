@@ -110,9 +110,8 @@ class AuthHandler:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="could not refresh access token",
             ) from None
-        # TODO брать id из токенов, а не email !!!
-        email: str = payload.get("email")
-        if not (user := await get_user(email, session)):
+        user_id: str = payload.get("sub")
+        if not (user := await get_user_by_id(user_id, session)):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="the user no longer exists",
@@ -134,8 +133,6 @@ class AuthHandler:
         """Функция создания токена по заданным параметрам."""
         jwt_payload = {
             "sub": str(data.id),
-            # TODO Убрать email изи токенов !!!
-            "email": data.email,
             "type": type_token,
         }
         token = auth_utils.encode_jwt(jwt_payload, expire_minutes=expires_time)

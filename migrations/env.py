@@ -7,8 +7,8 @@ from alembic import context
 
 from src.config import settings
 from src.auth.models import AuthUser # noqa
-from src.team.models import Team # noqa
-from src.user_profile.models import UserProfile # noqa
+from src.team.models import Team, Tags # noqa
+from src.user_profile.models import UserProfile, Contact # noqa
 from src.database import Base
 
 config = context.config

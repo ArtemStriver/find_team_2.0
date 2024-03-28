@@ -21,7 +21,7 @@ profile_router = APIRouter(
 
 
 @profile_router.get(
-    "/profile/{user_id}",
+    "/{user_id}",
     response_model=UserProfileSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -31,7 +31,7 @@ async def profile(
     _: Annotated[UserSchema, Depends(current_user)],
 ) -> UserProfileSchema:
     """Получение данных профиля пользователя."""
-    if (user_profile := await crud.get_profile(user_id, session)) is None:
+    if (user_profile := await crud.get_user_profile(user_id, session)) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="there is no such profile",
@@ -50,7 +50,7 @@ async def change_profile(
     updated_data: UpdateProfileSchema,
 ) -> ResponseSchema:
     """Изменение профиля пользователя."""
-    return await crud.change_profile(updated_data, user, session)
+    return await crud.change_user_profile(updated_data, user, session)
 
 
 @profile_router.delete(
@@ -64,21 +64,20 @@ async def delete_profile(
     response: Response,
 ) -> ResponseSchema:
     """Удалить профиля пользователя и его данные."""
-    return await crud.delete_profile(user, session, response)
+    return await crud.delete_user_profile(user, session, response)
 
 
-# TODO подумать над названиями функций!!!
 @profile_router.get(
-    "/teams",
+    "/teams_i_am_on",
     response_model=list[TeamPreviewSchema],
     status_code=status.HTTP_200_OK,
 )
-async def get_teams(
+async def get_teams_i_am_on(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
 ) -> list[TeamPreviewSchema]:
     """Получение списка команд, в которых состоит пользователь."""
-    return await crud.get_teams(user.id, session)
+    return await crud.get_teams_where_user_is_on(user.id, session)
 
 
 @profile_router.get(
@@ -92,23 +91,3 @@ async def get_my_teams(
 ) -> list[TeamPreviewSchema]:
     """Получение команд пользователя."""
     return await crud.get_user_teams(user.id, session)
-
-
-# TODO убрать и использовать find/team/id ??? Отличие только в проверке на причастность команды пользователю
-@profile_router.get(
-    "/my_team/{team_id}",
-    response_model=TeamSchema,
-    status_code=status.HTTP_200_OK,
-)
-async def get_my_team(
-    team_id: uuid.UUID,
-    session: Annotated[AsyncSession, Depends(get_async_session)],
-    user: Annotated[UserSchema, Depends(current_user)],
-) -> TeamSchema | None:
-    """Получение данных o команде пользователя."""
-    if not (team := await crud.get_user_team(team_id, user.id, session)):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="user does not have access to this team",
-        )
-    return team

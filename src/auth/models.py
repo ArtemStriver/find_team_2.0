@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -27,8 +27,8 @@ class AuthUser(Base):
     )
     hashed_password: Mapped[bytes] = mapped_column(nullable=False)
     verified: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc).replace(tzinfo=None))
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc).replace(tzinfo=None))
 
     teams = relationship(
         "Team",
@@ -41,6 +41,3 @@ class AuthUser(Base):
         back_populates="applications_from",
         secondary=application_to_join_table,
     )
-
-    # TODO нужны ли настройки для юзера?
-    # TODO settings = relationship("UserSettings", back_populates="user")

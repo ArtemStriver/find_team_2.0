@@ -50,7 +50,6 @@ async def update_team(
     return await crud.update_team(team_id, update_data, session, user)
 
 
-# TODO надо организовать автоматическое удаление команды по истечению дедлайна + пара часов или день. ???
 @team_router.delete(
     "/delete/{team_id}",
     response_model=ResponseSchema,

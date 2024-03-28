@@ -33,6 +33,7 @@ def get_email_for_recover_password(user_email: str, token: str):
 def send_email(user_email: str, token: str):
     email = get_email_for_register(user_email, token)
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        # TODO данные в env!!!
         server.login("artemstriver@gmail.com", "pttv foby vrfs puiz")
         server.send_message(email)
 
@@ -40,5 +41,6 @@ def send_email(user_email: str, token: str):
 def send_email_for_recover_password(user_email: str, token: str):
     email = get_email_for_recover_password(user_email, token)
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        # TODO данные в env!!!
         server.login("artemstriver@gmail.com", "pttv foby vrfs puiz")
         server.send_message(email)

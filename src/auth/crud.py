@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth import utils as auth_utils
 from src.auth.models import AuthUser
 from src.auth.schemas import CreateUserSchema, UserSchema, PasswordChangeSchema
-from src.user_profile.crud import create_profile
+from src.user_profile.crud import create_user_profile
 
 
 async def get_user(
@@ -63,7 +63,7 @@ async def create_user(
     user = await get_user(user_data.email, session)
     await session.commit()
     # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
-    await create_profile(user, session)
+    await create_user_profile(user, session)
     # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
     return UserSchema(
         id=user.id,
