@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.find.crud import get_team_data
-from src.team.models import Team, application_to_join_table, team_members_table
+from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
 from src.team.schemas import ApplicationSchema, CreateTeamSchema, MemberSchema
 
 
@@ -16,9 +16,30 @@ async def create_team(
     user: UserSchema,
 ) -> ResponseSchema:
     """Создание команды."""
-    full_team_data = {"owner": user.id, **team_data.model_dump()}
-    stmt = insert(Team).values(**full_team_data)
-    await session.execute(stmt)
+    stmt_for_team = insert(Team).values({
+        "owner": user.id,
+        "title": team_data.title,
+        "type_team": team_data.type_team,
+        "number_of_members": team_data.number_of_members,
+        "team_description": team_data.team_description,
+        "team_deadline_at": team_data.team_deadline_at,
+        "team_city": team_data.team_city,
+    }).returning(Team.id)
+
+    new_team_id = (await session.execute(stmt_for_team)).scalar_one_or_none()
+
+    stmt_for_team_tags = insert(TeamTags).values({
+        "team_id": new_team_id,
+        "tag1": team_data.tags.tag1,
+        "tag2": team_data.tags.tag2,
+        "tag3": team_data.tags.tag3,
+        "tag4": team_data.tags.tag4,
+        "tag5": team_data.tags.tag5,
+        "tag6": team_data.tags.tag6,
+        "tag7": team_data.tags.tag7,
+    })
+    await session.execute(stmt_for_team_tags)
+
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_201_CREATED,
@@ -33,14 +54,13 @@ async def update_team(
     user: UserSchema,
 ) -> ResponseSchema:
     """Обновление команды."""
-    stmt = (
+    stmt_for_team = (
         update(Team)
         .values({
             "title": update_data.title,
             "number_of_members": update_data.number_of_members,
             "team_contacts": update_data.team_contacts,
             "team_description": update_data.team_description,
-            "team_tags": update_data.team_tags,
             "team_deadline_at": update_data.team_deadline_at,
             "team_city": update_data.team_city,
         })
@@ -50,7 +70,24 @@ async def update_team(
         ))
         .returning(Team)
     )
-    await session.execute(stmt)
+    await session.execute(stmt_for_team)
+
+    stmt_for_team_tags = (
+        update(TeamTags)
+        .values({
+            "tag1": update_data.tags.tag1,
+            "tag2": update_data.tags.tag2,
+            "tag3": update_data.tags.tag3,
+            "tag4": update_data.tags.tag4,
+            "tag5": update_data.tags.tag5,
+            "tag6": update_data.tags.tag6,
+            "tag7": update_data.tags.tag7,
+        })
+        .where(and_(
+            TeamTags.team_id == team_id,
+        ))
+    )
+    await session.execute(stmt_for_team_tags)
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
@@ -101,7 +138,6 @@ async def get_members_list(
             detail="no access",
         ) from None
     return result.all()
-# TODO убрать дублирование кода и настроить релейшеншипс для отображения данных пользователя.
 
 
 async def get_application_list(

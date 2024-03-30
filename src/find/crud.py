@@ -6,8 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.auth.schemas import ResponseSchema, UserSchema
-from src.team.models import Team, application_to_join_table, team_members_table
-from src.team.schemas import TeamSchema
+from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
+from src.team.schemas import TeamSchema, TeamTagsSchema
+from src.user_profile.models import UserContacts
+from src.user_profile.schemas import UserContactsSchema
 
 
 async def get_teams_list(
@@ -17,7 +19,17 @@ async def get_teams_list(
     query = (select(Team)
              .options(selectinload(Team.members)))
     result = await session.execute(query)
-    return result.scalars().all()
+    teams = result.scalars().all()
+
+    for team in teams:
+        query_for_tags = (
+            select(TeamTags)
+            .where(TeamTags.team_id == team.id)
+        )
+        res = await session.execute(query_for_tags)
+        team_tags = res.unique().scalar_one_or_none()
+        team.tags = team_tags
+    return teams
 
 
 async def get_team_data(
@@ -25,18 +37,52 @@ async def get_team_data(
     session: AsyncSession,
 ) -> TeamSchema | None:
     """Получение данных команды."""
-    query = (
+    query_team = (
         select(Team)
         .options(selectinload(Team.members))
         .where(Team.id == team_id)
     )
-    result = await session.execute(query)
-    team = result.unique().scalar_one_or_none()
-    if not team:
+    result_team_data = (await session.execute(query_team)).unique().scalar_one_or_none()
+    if not result_team_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="there is no such team",
         ) from None
+    query_tags = (select(TeamTags).where(TeamTags.team_id == team_id))
+    result_tags = (await session.execute(query_tags)).unique().scalar_one_or_none()
+    tags = TeamTagsSchema(
+        tag1=result_tags.tag1,
+        tag2=result_tags.tag2,
+        tag3=result_tags.tag3,
+        tag4=result_tags.tag4,
+        tag5=result_tags.tag5,
+        tag6=result_tags.tag6,
+        tag7=result_tags.tag7,
+    )
+    query_contacts = (select(UserContacts).where(UserContacts.user_id == result_team_data.owner))
+    result_contacts = (await session.execute(query_contacts)).unique().scalar_one_or_none()
+    contacts = UserContactsSchema(
+        email=result_contacts.email,
+        vk=result_contacts.vk,
+        telegram=result_contacts.telegram,
+        discord=result_contacts.discord,
+        other=result_contacts.other,
+    )
+    team = TeamSchema(
+        id=result_team_data.id,
+        owner=result_team_data.owner,
+        title=result_team_data.title,
+        type_team=result_team_data.type_team,
+        number_of_members=result_team_data.number_of_members,
+        team_description=result_team_data.team_description,
+        team_deadline_at=result_team_data.team_deadline_at,
+        team_city=result_team_data.team_city,
+        created_at=result_team_data.created_at,
+        updated_at=result_team_data.updated_at,
+        members=result_team_data.members,
+        tags=tags,
+        contacts=contacts,
+    )
     return team
 
 

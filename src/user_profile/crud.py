@@ -10,16 +10,56 @@ from src.auth.schemas import UserSchema, ResponseSchema
 from src.team.models import Team, team_members_table
 from src.team.schemas import TeamSchema
 from src.user_profile.models import UserProfile, UserContacts, UserHobbies
-from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema
+from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema, UserContactsSchema, UserHobbiesSchema
 
 
 async def get_user_profile(
     user_id: uuid.UUID,
     session: AsyncSession,
 ) -> UserProfileSchema | None:
-    query = select(UserProfile).where(UserProfile.user_id == user_id)
-    user_profile = await session.execute(query)
-    return user_profile.scalar_one_or_none()
+    try:
+        query_for_profile = select(UserProfile).where(UserProfile.user_id == user_id)
+        result_profile = await session.execute(query_for_profile)
+        user_profile = result_profile.scalar_one_or_none()
+        if user_profile is None:
+            return None
+
+        query_for_contacts = select(UserContacts).where(UserContacts.user_id == user_id)
+        result_contacts = (await session.execute(query_for_contacts)).scalar_one_or_none()
+        user_contacts = UserContactsSchema(
+            email=result_contacts.email,
+            vk=result_contacts.vk,
+            telegram=result_contacts.telegram,
+            discord=result_contacts.discord,
+            other=result_contacts.other,
+        )
+        query_for_hobbies = select(UserHobbies).where(UserHobbies.user_id == user_id)
+        result_hobbies = (await session.execute(query_for_hobbies)).scalar_one_or_none()
+        user_hobbies = UserHobbiesSchema(
+            lifestyle1=result_hobbies.lifestyle1,
+            lifestyle2=result_hobbies.lifestyle2,
+            lifestyle3=result_hobbies.lifestyle3,
+            sport1=result_hobbies.sport1,
+            sport2=result_hobbies.sport2,
+            sport3=result_hobbies.sport3,
+            work1=result_hobbies.work1,
+            work2=result_hobbies.work2,
+            work3=result_hobbies.work3,
+        )
+        profile_data = UserProfileSchema(
+            id=user_profile.id,
+            user_id=user_profile.user_id,
+            image_path=user_profile.image_path,
+            contacts=user_contacts,
+            description=user_profile.description,
+            hobbies=user_hobbies,
+        )
+        return profile_data
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="cannot get profile data",
+        )
 
 
 async def create_user_profile(

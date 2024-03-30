@@ -92,7 +92,7 @@ async def get_applications(
 
 
 @team_router.post(
-    "/take_comrade",  # может сменить comrade на friend
+    "/take_comrade",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -107,7 +107,7 @@ async def take_comrade(
 
 
 @team_router.post(
-    "/reject_comrade",  # может сменить comrade на friend
+    "/reject_comrade",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -122,7 +122,7 @@ async def reject_comrade(
 
 
 @team_router.post(
-    "/exclude_comrade",  # может сменить comrade на friend
+    "/exclude_comrade",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )

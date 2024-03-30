@@ -1,10 +1,9 @@
 import uuid
 import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
-from src.team.models import Tags
+from src.team.schemas import TeamTagsSchema
 
 
 class TeamPreviewSchema(BaseModel):
@@ -12,5 +11,5 @@ class TeamPreviewSchema(BaseModel):
     title: str
     type_team: str
     number_of_members: int
-    # tags: Optional[list["Tags"]]
     team_deadline_at: datetime.date
+    tags: TeamTagsSchema

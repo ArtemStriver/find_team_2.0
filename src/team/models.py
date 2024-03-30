@@ -66,21 +66,20 @@ class Team(Base):
         secondary=application_to_join_table,
     )
 
-    tags: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("team_tags.id", ondelete="CASCADE"),
-        nullable=True
-    )
-
 
 class TeamTags(Base):
     __tablename__ = "team_tags"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    team_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("team.id", ondelete="CASCADE"), nullable=False)
-    tag1: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    tag2: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    tag3: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    tag4: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    tag5: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    tag6: Mapped[str] = mapped_column(String(length=50), nullable=False)
-    tag7: Mapped[str] = mapped_column(String(length=50), nullable=False)
+    team_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("team.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    tag1: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)
+    tag2: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)
+    tag3: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)
+    tag4: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)
+    tag5: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)
+    tag6: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)
+    tag7: Mapped[str] = mapped_column(String(length=50), nullable=True, default=None)

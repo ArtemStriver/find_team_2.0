@@ -5,15 +5,17 @@ from typing import Optional
 from pydantic import BaseModel
 
 from src.auth.schemas import UserSchema
-from src.team.models import Tags
-from src.user_profile.models import Contact
+from src.user_profile.schemas import UserContactsSchema
 
 
-class TagSchema(BaseModel):
-    tag_name: str
-
-    class Config:
-        orm_mode = True
+class TeamTagsSchema(BaseModel):
+    tag1: str | None
+    tag2: str | None
+    tag3: str | None
+    tag4: str | None
+    tag5: str | None
+    tag6: str | None
+    tag7: str | None
 
 
 class CreateTeamSchema(BaseModel):
@@ -23,8 +25,7 @@ class CreateTeamSchema(BaseModel):
     team_description: str
     team_deadline_at: datetime.date
     team_city: str = "Интернет"
-    # tags: list[TagSchema]
-    # contacts: Contact
+    tags: TeamTagsSchema
 
 
 class TeamSchema(BaseModel):
@@ -39,8 +40,8 @@ class TeamSchema(BaseModel):
     created_at: datetime.datetime
     updated_at: datetime.datetime
     members: Optional[list[UserSchema]]
-    # tags: list[TagSchema]
-    # contacts: Contact
+    tags: TeamTagsSchema
+    contacts: UserContactsSchema
 
 
 class MemberSchema(BaseModel):
