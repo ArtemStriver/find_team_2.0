@@ -13,7 +13,7 @@ from src.auth.models import AuthUser
 from src.auth.schemas import CreateUserSchema, LoginUserSchema, UserSchema, ResponseSchema, PasswordChangeSchema
 from src.config import settings
 from src.database import get_async_session
-from src.email_settings import send_email, send_email_for_recover_password
+from src.email_settings import send_email
 
 
 class AuthHandler:
@@ -196,7 +196,12 @@ class AuthHandler:
             return False
         if not user.verified:
             token = await cls.generate_email_token(user.id)
-            send_email(user.email, token)
+            send_email(
+                user_email=user.email,
+                subject="Подтверждение регистрации",
+                content_with_token=f"Для подтверждения email, перейдите по ссылке: "
+                                   f"http://127.0.0.1:8000/auth/verify/{token}",
+            )
             return True
 
     @classmethod
@@ -211,7 +216,12 @@ class AuthHandler:
                 detail="invalid user data",
             )
         token = await cls.generate_email_token(user.id)
-        send_email(user.email, token)
+        send_email(
+            user_email=user.email,
+            subject="Подтверждение регистрации",
+            content_with_token=f"Для подтверждения email, перейдите по ссылке: "
+                               f"http://127.0.0.1:8000/auth/verify/{token}",
+        )
 
     @staticmethod
     async def generate_email_token(user_id: str | uuid.UUID):
@@ -248,7 +258,14 @@ class AuthHandler:
                 detail="there is no user with this email",
             )
         token = await cls.generate_email_token(user.id)
-        send_email_for_recover_password(email, token)
+        send_email(
+            user_email=user.email,
+            subject="Сброс пароля",
+            content_with_token=f"Если вы не хотели менять пароль - проигнорируйте это сообщение!!!\n\n"
+                               f"Для сброса пароля, перейдите по ссылке: "
+                               # TODO поменять ссылку - она должна вести на фронтенд и передавать в ней токен.
+                               f"http://127.0.0.1:3000/change_password/{token}",
+        )
         return ResponseSchema(
             status_code=status.HTTP_201_CREATED,
             detail="the link for password recovery has been sent to the specified email",

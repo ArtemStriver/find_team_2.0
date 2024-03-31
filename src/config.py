@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRES_IN: int
     REFRESH_TOKEN_EXPIRES_IN: int
 
+    EMAIL_HOST: str
+    EMAIL_PORT: int
+    EMAIL_HOST_USER: str
+    EMAIL_HOST_PASSWORD: str
+
     class Config:
         env_file = ".env"
 

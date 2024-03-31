@@ -96,6 +96,7 @@ async def verify(
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
     await create_user_profile(user, session)
+    # TODO RedirectResponse("http://127.0.0.1:3000/home") - на митап
     return RedirectResponse("http://127.0.0.1:3000/home")
 
 

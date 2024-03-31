@@ -42,7 +42,7 @@ class Team(Base):
 
     team_deadline_at: Mapped[datetime.date] = mapped_column(
         nullable=False,
-        default=datetime.date.today  # TODO + datetime.timedelta(days=1)
+        default=datetime.date.today
     )
 
     team_city: Mapped[str] = mapped_column(nullable=False, default="Интернет")
