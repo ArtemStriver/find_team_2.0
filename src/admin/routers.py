@@ -25,7 +25,7 @@ from src.database import get_async_session
 
 
 admin_router = APIRouter(
-    prefix=f"/admin/{settings.SECRET_PATH}/",
+    prefix=f"/admin/{settings.SECRET_PATH}",
     tags=["Admin"],
 )
 

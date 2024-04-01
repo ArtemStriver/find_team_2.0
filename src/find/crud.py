@@ -5,6 +5,7 @@ from sqlalchemy import and_, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from src.auth.models import AuthUser
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
 from src.team.schemas import TeamSchema, TeamTagsSchema
@@ -59,18 +60,12 @@ async def get_team_data(
         tag6=result_tags.tag6,
         tag7=result_tags.tag7,
     )
-    query_contacts = (select(UserContacts).where(UserContacts.user_id == result_team_data.owner))
-    result_contacts = (await session.execute(query_contacts)).unique().scalar_one_or_none()
-    contacts = UserContactsSchema(
-        email=result_contacts.email,
-        vk=result_contacts.vk,
-        telegram=result_contacts.telegram,
-        discord=result_contacts.discord,
-        other=result_contacts.other,
-    )
+    query_owner_name = (select(AuthUser).where(AuthUser.id == result_team_data.owner))
+    result_owner_name = (await session.execute(query_owner_name)).unique().scalar_one_or_none()
     team = TeamSchema(
         id=result_team_data.id,
         owner=result_team_data.owner,
+        owner_name=result_owner_name.username,
         title=result_team_data.title,
         type_team=result_team_data.type_team,
         number_of_members=result_team_data.number_of_members,
@@ -81,7 +76,6 @@ async def get_team_data(
         updated_at=result_team_data.updated_at,
         members=result_team_data.members,
         tags=tags,
-        contacts=contacts,
     )
     return team
 

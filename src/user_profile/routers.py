@@ -8,7 +8,6 @@ from src.auth.auth_handler import current_user
 from src.auth.schemas import UserSchema, ResponseSchema
 from src.database import get_async_session
 from src.find.schemas import TeamPreviewSchema
-from src.team.schemas import TeamSchema
 from src.user_profile import crud
 from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema
 
