@@ -20,6 +20,32 @@ profile_router = APIRouter(
 
 
 @profile_router.get(
+    "/teams_i_am_on",
+    response_model=list[TeamPreviewSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_teams_i_am_on(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: Annotated[UserSchema, Depends(current_user)],
+) -> list[TeamPreviewSchema]:
+    """Получение списка команд, в которых состоит пользователь."""
+    return await crud.get_teams_where_user_is_on(user.id, session)
+
+
+@profile_router.get(
+    "/my_teams",
+    response_model=list[TeamPreviewSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_my_teams(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: Annotated[UserSchema, Depends(current_user)],
+) -> list[TeamPreviewSchema]:
+    """Получение команд пользователя."""
+    return await crud.get_user_teams(user.id, session)
+
+
+@profile_router.get(
     "/{user_id}",
     response_model=UserProfileSchema,
     status_code=status.HTTP_200_OK,
@@ -64,29 +90,3 @@ async def delete_profile(
 ) -> ResponseSchema:
     """Удалить профиля пользователя и его данные."""
     return await crud.delete_user_profile(user, session, response)
-
-
-@profile_router.get(
-    "/teams_i_am_on",
-    response_model=list[TeamPreviewSchema],
-    status_code=status.HTTP_200_OK,
-)
-async def get_teams_i_am_on(
-    session: Annotated[AsyncSession, Depends(get_async_session)],
-    user: Annotated[UserSchema, Depends(current_user)],
-) -> list[TeamPreviewSchema]:
-    """Получение списка команд, в которых состоит пользователь."""
-    return await crud.get_teams_where_user_is_on(user.id, session)
-
-
-@profile_router.get(
-    "/my_teams",
-    response_model=list[TeamPreviewSchema],
-    status_code=status.HTTP_200_OK,
-)
-async def get_my_teams(
-    session: Annotated[AsyncSession, Depends(get_async_session)],
-    user: Annotated[UserSchema, Depends(current_user)],
-) -> list[TeamPreviewSchema]:
-    """Получение команд пользователя."""
-    return await crud.get_user_teams(user.id, session)

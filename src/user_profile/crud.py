@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema, ResponseSchema
-from src.team.models import Team, team_members_table
+from src.team.models import Team, team_members_table, TeamTags
 from src.team.schemas import TeamSchema
 from src.user_profile.models import UserProfile, UserContacts, UserHobbies
 from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema, UserContactsSchema, UserHobbiesSchema
@@ -195,6 +195,14 @@ async def get_teams_where_user_is_on(
         )
         team = (await session.execute(query)).scalar_one_or_none()
         teams.append(team)
+    for team in teams:
+        query_for_tags = (
+            select(TeamTags)
+            .where(TeamTags.team_id == team.id)
+        )
+        res = await session.execute(query_for_tags)
+        team_tags = res.unique().scalar_one_or_none()
+        team.tags = team_tags
     return teams
 
 
@@ -207,5 +215,13 @@ async def get_user_teams(
         select(Team)
         .where(Team.owner == user_id)
     )
-    user_teams = await session.execute(query)
-    return user_teams.scalars().all()
+    teams = (await session.execute(query)).scalars().all()
+    for team in teams:
+        query_for_tags = (
+            select(TeamTags)
+            .where(TeamTags.team_id == team.id)
+        )
+        res = await session.execute(query_for_tags)
+        team_tags = res.unique().scalar_one_or_none()
+        team.tags = team_tags
+    return teams
