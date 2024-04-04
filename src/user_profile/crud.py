@@ -5,6 +5,7 @@ from fastapi import status, HTTPException, Response
 from sqlalchemy import and_, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth import crud as auth_crud
 from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema, ResponseSchema
 from src.team.models import Team, team_members_table, TeamTags
@@ -46,9 +47,11 @@ async def get_user_profile(
             work2=result_hobbies.work2,
             work3=result_hobbies.work3,
         )
+        username = (await auth_crud.get_user_by_id(user_id, session)).username
         profile_data = UserProfileSchema(
             id=user_profile.id,
             user_id=user_profile.user_id,
+            username=username,
             image_path=user_profile.image_path,
             contacts=user_contacts,
             description=user_profile.description,

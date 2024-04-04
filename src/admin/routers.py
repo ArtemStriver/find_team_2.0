@@ -4,10 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.admin import crud, utils
+from src.admin.schemas import MainInfoOfTeamSchema, MainInfoOfUserSchema
 from src.auth.auth_handler import current_user
-from src.auth.schemas import UserSchema
+from src.auth.schemas import UserSchema, ResponseSchema
 from src.config import settings
 from src.database import get_async_session
+from src.team.schemas import TeamSchema
 
 """
 Админ-панель будет организована через swagger - интерактивную документацию.
@@ -32,24 +35,30 @@ admin_router = APIRouter(
 
 @admin_router.get(
     "/all_users",
+    response_model=list[UserSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_all_users(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> None:
+) -> list[UserSchema]:
     """Получение списка всех пользователей с подробной информацией о них."""
+    if utils.check_admin(user.username):
+        return await crud.get_all_users(session)
 
 
 @admin_router.get(
     "/all_teams",
+    response_model=list[MainInfoOfTeamSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_all_teams(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> None:
+) -> list[MainInfoOfTeamSchema]:
     """Получение списка всех команд с краткой информацией о них."""
+    if utils.check_admin(user.username):
+        return await crud.get_all_teams(session)
 
 
 @admin_router.get(
@@ -57,23 +66,28 @@ async def get_all_teams(
     status_code=status.HTTP_200_OK,
 )
 async def search_user(
-    user_info: str,
+    user_id: uuid.UUID | str,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> None:
-    """Поиск и получение данных о пользователе по его email/username/id."""
+) -> MainInfoOfUserSchema | None:
+    """Поиск и получение данных о пользователе по его id."""
+    if utils.check_admin(user.username):
+        return await crud.search_user_data(user_id, session)
 
 
 @admin_router.get(
     "/search_team",
+    response_model=TeamSchema | None,
     status_code=status.HTTP_200_OK,
 )
 async def search_team(
     team_id: str | uuid.UUID,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> None:
+) -> TeamSchema | None:
     """Поиск и получение данных о команде по ее id."""
+    if utils.check_admin(user.username):
+        return await crud.search_team_data(team_id, session)
 
 
 @admin_router.delete(
@@ -81,11 +95,13 @@ async def search_team(
     status_code=status.HTTP_200_OK,
 )
 async def delete_user(
-    user_info: str,
+    user_id: str | uuid.UUID,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> None:
-    """Удаление пользователя по его email/username/id."""
+) -> ResponseSchema:
+    """Удаление пользователя по его id."""
+    if utils.check_admin(user.username):
+        return await crud.delete_user(user_id, session)
 
 
 @admin_router.delete(
@@ -96,5 +112,7 @@ async def delete_team(
     team_id: str | uuid.UUID,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> None:
+) -> ResponseSchema:
     """Удаление команды по ее id."""
+    if utils.check_admin(user.username):
+        return await crud.delete_team(team_id, session)

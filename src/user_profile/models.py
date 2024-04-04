@@ -14,15 +14,6 @@ class UserProfile(Base):
     image_path: Mapped[str] = mapped_column(nullable=True)
     description: Mapped[str] = mapped_column(nullable=False)
 
-    # hobbies: Mapped[uuid.UUID] = mapped_column(
-    #     ForeignKey("user_hobbies.id", ondelete="CASCADE"),
-    #     nullable=False
-    # )
-    # contacts: Mapped[uuid.UUID] = mapped_column(
-    #     ForeignKey("user_contact.id", ondelete="CASCADE"),
-    #     nullable=True
-    # )
-
 
 class UserContacts(Base):
     __tablename__ = "user_contact"

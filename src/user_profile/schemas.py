@@ -26,6 +26,7 @@ class UserHobbiesSchema(BaseModel):
 class UserProfileSchema(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
+    username: str
     image_path: str
     contacts: UserContactsSchema
     description: str
