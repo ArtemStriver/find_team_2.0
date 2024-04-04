@@ -5,9 +5,10 @@ from fastapi import status, HTTPException, Response
 from sqlalchemy import and_, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth import crud as auth_crud
 from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema, ResponseSchema
-from src.team.models import Team, team_members_table
+from src.team.models import Team, team_members_table, TeamTags
 from src.team.schemas import TeamSchema
 from src.user_profile.models import UserProfile, UserContacts, UserHobbies
 from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema, UserContactsSchema, UserHobbiesSchema
@@ -46,9 +47,11 @@ async def get_user_profile(
             work2=result_hobbies.work2,
             work3=result_hobbies.work3,
         )
+        username = (await auth_crud.get_user_by_id(user_id, session)).username
         profile_data = UserProfileSchema(
             id=user_profile.id,
             user_id=user_profile.user_id,
+            username=username,
             image_path=user_profile.image_path,
             contacts=user_contacts,
             description=user_profile.description,
@@ -195,6 +198,14 @@ async def get_teams_where_user_is_on(
         )
         team = (await session.execute(query)).scalar_one_or_none()
         teams.append(team)
+    for team in teams:
+        query_for_tags = (
+            select(TeamTags)
+            .where(TeamTags.team_id == team.id)
+        )
+        res = await session.execute(query_for_tags)
+        team_tags = res.unique().scalar_one_or_none()
+        team.tags = team_tags
     return teams
 
 
@@ -207,5 +218,13 @@ async def get_user_teams(
         select(Team)
         .where(Team.owner == user_id)
     )
-    user_teams = await session.execute(query)
-    return user_teams.scalars().all()
+    teams = (await session.execute(query)).scalars().all()
+    for team in teams:
+        query_for_tags = (
+            select(TeamTags)
+            .where(TeamTags.team_id == team.id)
+        )
+        res = await session.execute(query_for_tags)
+        team_tags = res.unique().scalar_one_or_none()
+        team.tags = team_tags
+    return teams

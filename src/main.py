@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from src.admin.routers import admin_router
 from src.auth.routers import auth_router
 from src.find.routers import find_router
 from src.team.routers import team_router
@@ -29,12 +30,9 @@ app.add_middleware(
                    "Access-Control-Allow-Origin", "Authorization"],
 )
 
-# TODO почитать надо ли это, если да, то настроить админку.
-# TODO admin.mount_to(app)
-# TODO main_router = APIRouter(prefix='/api')
-
 """Запуск роутеров"""
 app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(team_router)
 app.include_router(find_router)
+app.include_router(admin_router)

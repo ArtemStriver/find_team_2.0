@@ -31,6 +31,7 @@ class CreateTeamSchema(BaseModel):
 class TeamSchema(BaseModel):
     id: uuid.UUID
     owner: uuid.UUID
+    owner_name: str
     title: str
     type_team: str
     number_of_members: int
@@ -41,7 +42,6 @@ class TeamSchema(BaseModel):
     updated_at: datetime.datetime
     members: Optional[list[UserSchema]]
     tags: TeamTagsSchema
-    contacts: UserContactsSchema
 
 
 class MemberSchema(BaseModel):
