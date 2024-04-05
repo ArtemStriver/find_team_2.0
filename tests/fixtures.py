@@ -13,21 +13,29 @@ test_user_data_login = {
     "password": "string",
 }
 test_user_data = {
-  "username": "test",
-  "email": "test@example.com",
-  "hashed_password": "string",
-  "confirmed_password": "string",
-  "verified": True,
+    "username": "test",
+    "email": "test@example.com",
+    "hashed_password": "string",
+    "confirmed_password": "string"
 }
 
 team_data = {
-            "title": "test",
-            "number_of_members": 1,
-            "contacts": "@test_telegram",
-            "description": "We need a cool team to test this program.",
-            "tags": "test, ",
-            "deadline_at": "2024-02-02T05:00:53",
-        }
+    "title": "string",
+    "type_team": "lifestyle",
+    "number_of_members": 1,
+    "team_description": "string",
+    "team_deadline_at": "2024-04-05",
+    "team_city": "Интернет",
+    "tags": {
+        "tag1": "string",
+        "tag2": "string",
+        "tag3": "string",
+        "tag4": "string",
+        "tag5": "string",
+        "tag6": "string",
+        "tag7": "string"
+    }
+}
 
 
 @pytest.fixture(scope="session")
