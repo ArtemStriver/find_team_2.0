@@ -75,5 +75,102 @@ class TestAllFunctional:
             "rstoken": response.cookies["rstoken"]
         }
 
-        """2.1 Создание команды первым пользователем."""
+        """2.1. Создание команды первым пользователем."""
+        team_data_1 = {
+            "title": "test_team_1",
+            "type_team": "lifestyle",
+            "number_of_members": 8,
+            "team_description": "First test team/",
+            "team_deadline_at": "2012-12-12",
+            "team_city": "Интернет",
+            "tags": {
+                "tag1": "test1",
+                "tag2": "1",
+                "tag3": None,
+                "tag4": None,
+                "tag5": None,
+                "tag6": None,
+                "tag7": None,
+            },
+        }
+        response = await async_client.post(
+            "/team/create",
+            json=team_data_1,
+            cookies=user_1_cookies,
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == {
+            "status_code": 201,
+            "detail": "team created",
+        }
 
+        """2.2. Создание команды вторым пользователем."""
+        team_data_2 = {
+            "title": "test_team_2",
+            "type_team": "work",
+            "number_of_members": 2,
+            "team_description": "Second test team/",
+            "team_deadline_at": "2012-12-12",
+            "team_city": "Интернет",
+            "tags": {
+                "tag1": "test2",
+                "tag2": "2",
+                "tag3": "2",
+                "tag4": None,
+                "tag5": None,
+                "tag6": None,
+                "tag7": None,
+            },
+        }
+        response = await async_client.post(
+            "/team/create",
+            json=team_data_2,
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json() == {
+            "status_code": 201,
+            "detail": "team created",
+        }
+
+        """2.3. Получение данных созданных команд."""
+        response = await async_client.get(
+            "/find/teams_list",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        if response.json()[0]["title"] == "test_team_1":
+            team_data_1, team_data_2 = response.json()[0], response.json()[1]
+        else:
+            team_data_1, team_data_2 = response.json()[1], response.json()[2]
+
+        """3.1. Заявка первого пользователя на вступление в команду второго пользователя."""
+        response = await async_client.post(
+            "/find/join",
+            json={
+                "team_id": team_data_2["id"],
+                "cover_letter": "Is user 1",
+            },
+            cookies=user_1_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "detail": "your application has been submitted"
+        }
+
+        """3.2. Заявка второго пользователя на вступление в команду первого пользователя."""
+        response = await async_client.post(
+            "/find/join",
+            json={
+                "team_id": team_data_1["id"],
+                "cover_letter": "Is user 2",
+            },
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "detail": "your application has been submitted"
+        }
+
+        """3.3. Проверка заявок пользователей на вступление в команды."""

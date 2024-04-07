@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from src.auth.models import AuthUser
 from src.auth.schemas import ResponseSchema, UserSchema
+from src.find.schemas import JoinDataSchema
 from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
 from src.team.schemas import TeamSchema, TeamTagsSchema
 from src.user_profile.models import UserContacts
@@ -81,8 +82,7 @@ async def get_team_data(
 
 
 async def join_in_team(
-    team_id: uuid.UUID,
-    cover_letter: str | None,
+    join_data: JoinDataSchema,
     user: UserSchema,
     session: AsyncSession,
 ) -> ResponseSchema:
@@ -90,8 +90,8 @@ async def join_in_team(
     try:
         stmt = insert(application_to_join_table).values(
             {"user_id": user.id,
-             "team_id": team_id,
-             "cover_letter": cover_letter},
+             "team_id": join_data.team_id,
+             "cover_letter": join_data.cover_letter},
         )
         await session.execute(stmt)
         await session.commit()
