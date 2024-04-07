@@ -1,24 +1,37 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
+from src.auth import utils as auth_utils
 from src.auth.models import AuthUser
 from src.auth.schemas import UserSchema
 from src.team.models import Team
 from src.team.schemas import TeamSchema
+from src.user_profile.crud import create_user_profile
 from tests.conftest import async_session_maker
 
-test_user_data_login = {
+user_data_login = {
     "email": "test@example.com",
     "password": "string",
 }
-test_user_data = {
-    "username": "test",
-    "email": "test@example.com",
+user_data = {
+    "username": "user",
+    "email": "user@example.com",
     "hashed_password": "string",
     "confirmed_password": "string"
 }
-
+test_user_data_1 = {
+    "username": "test1",
+    "email": "test1@example.com",
+    "hashed_password": "string",
+    "confirmed_password": "string"
+}
+test_user_data_2 = {
+    "username": "test2",
+    "email": "test2@example.com",
+    "hashed_password": "string",
+    "confirmed_password": "string"
+}
 team_data = {
     "title": "string",
     "type_team": "lifestyle",
@@ -39,10 +52,58 @@ team_data = {
 
 
 @pytest.fixture(scope="session")
+async def register_user_1(async_client: AsyncClient) -> None:
+    """Авторизованный тестовый пользователь."""
+    async with async_session_maker() as session:
+        stmt = insert(AuthUser).values(
+            {
+                "username": test_user_data_1["username"],
+                "email": test_user_data_1["email"],
+                "hashed_password": auth_utils.hash_password(test_user_data_1["hashed_password"]),
+                "verified": True,
+            },
+        ).returning(AuthUser.id, AuthUser.username, AuthUser.email, AuthUser.verified)
+        data = (await session.execute(stmt)).all()
+        new_user_data = UserSchema(
+            id=data[0][0],
+            username=data[0][1],
+            email=data[0][2],
+            verified=data[0][3],
+        )
+        await create_user_profile(new_user_data, session)
+        await session.commit()
+        return new_user_data
+
+
+@pytest.fixture(scope="session")
+async def register_user_2(async_client: AsyncClient) -> None:
+    """Авторизованный тестовый пользователь."""
+    async with async_session_maker() as session:
+        stmt = insert(AuthUser).values(
+            {
+                "username": test_user_data_2["username"],
+                "email": test_user_data_2["email"],
+                "hashed_password": auth_utils.hash_password(test_user_data_2["hashed_password"]),
+                "verified": True,
+            },
+        ).returning(AuthUser.id, AuthUser.username, AuthUser.email, AuthUser.verified)
+        data = (await session.execute(stmt)).all()
+        new_user_data = UserSchema(
+            id=data[0][0],
+            username=data[0][1],
+            email=data[0][2],
+            verified=data[0][3],
+        )
+        await create_user_profile(new_user_data, session)
+        await session.commit()
+        return new_user_data
+
+
+@pytest.fixture(scope="session")
 async def auth_user(async_client: AsyncClient) -> dict:
     """Авторизованный тестовый пользователь."""
     async with async_session_maker() as session:
-        query = select(AuthUser).where(AuthUser.email == test_user_data["email"])
+        query = select(AuthUser).where(AuthUser.email == user_data["email"])
         result = await session.execute(query)
         return result.scalar_one_or_none()
 
@@ -52,7 +113,7 @@ async def test_user_cookies(async_client: AsyncClient) -> dict:
     """Test user."""
     await async_client.post(
         "/auth/register",
-        json=test_user_data,
+        json=user_data,
     )
     access_token = async_client.cookies.get("find-team")
     return {"find-team": access_token}

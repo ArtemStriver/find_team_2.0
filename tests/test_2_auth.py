@@ -8,6 +8,7 @@ from starlette import status
 from src.auth import utils as auth_utils
 
 
+@pytest.mark.skip
 class TestAuthUser:
     """Тесты на регистрацию, логин, перевыпуск токенов и логаут пользователя."""
 

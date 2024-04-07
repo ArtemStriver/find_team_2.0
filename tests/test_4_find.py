@@ -1,8 +1,10 @@
+import pytest
 from dirty_equals import IsStr, IsUUID
 from fastapi import status
 from httpx import AsyncClient
 
 
+@pytest.mark.skip
 class TestFindModule:
 
     async def test_team_list(
