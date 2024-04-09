@@ -60,7 +60,6 @@ async def update_team(
         .values({
             "title": update_data.title,
             "number_of_members": update_data.number_of_members,
-            "team_contacts": update_data.team_contacts,
             "team_description": update_data.team_description,
             "team_deadline_at": update_data.team_deadline_at,
             "team_city": update_data.team_city,
@@ -92,7 +91,7 @@ async def update_team(
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="team updated",
+        detail="team is updated",
     )
 
 
@@ -118,7 +117,7 @@ async def delete_team(
         )
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="team deleted",
+        detail="team is deleted",
     )
 
 

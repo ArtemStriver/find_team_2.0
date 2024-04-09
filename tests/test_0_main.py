@@ -343,3 +343,85 @@ class TestAllFunctional:
             cookies=user_2_cookies,
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        """7.1. Изменение данных второй команды."""
+        update_team_data = {
+            "title": "test_team_2 (updated)",
+            "type_team": "work",
+            "number_of_members": 3,
+            "team_description": "Updated second test team/",
+            "team_deadline_at": "2010-10-10",
+            "team_city": "Интернет",
+            "tags": {
+                "tag1": "test2 - update",
+                "tag2": "new",
+                "tag3": "new",
+                "tag4": "2 new",
+                "tag5": None,
+                "tag6": None,
+                "tag7": None,
+            },
+        }
+        response = await async_client.patch(
+            f"/team/change/{team_data_2['id']}",
+            json=update_team_data,
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "detail": "team is updated",
+        }
+
+        """7.2. Проверка обновленных данных второй команды."""
+        response = await async_client.get(
+            f"/find/team/{team_data_2['id']}",
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "id": str(team_data_2["id"]),
+            "owner": str(register_user_2.id),
+            "owner_name": register_user_2.username,
+            "title": "test_team_2 (updated)",
+            "type_team": "work",
+            "number_of_members": 3,
+            "team_description": "Updated second test team/",
+            "team_deadline_at": "2010-10-10",
+            "team_city": "Интернет",
+            "created_at": IsStr,
+            "updated_at": IsStr,
+            "members": [],
+            "tags": {
+                "tag1": "test2 - update",
+                "tag2": "new",
+                "tag3": "new",
+                "tag4": "2 new",
+                "tag5": None,
+                "tag6": None,
+                "tag7": None,
+            },
+        }
+
+        """7.3. Удаление второй команды."""
+        response = await async_client.delete(
+            f"/team/delete/{team_data_2['id']}",
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "detail": "team is deleted",
+        }
+
+        """7.4. Проверка отсутствия данных второй команды."""
+        response = await async_client.get(
+            f"/find/team/{team_data_2['id']}",
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {
+            "detail": "there is no such team",
+        }
+
+        """8. Изменение и удаление профиля пользователя."""
