@@ -16,5 +16,5 @@ class TeamPreviewSchema(BaseModel):
 
 
 class JoinDataSchema(BaseModel):
-    team_id: uuid.UUID
+    team_id: str | uuid.UUID
     cover_letter: str | None

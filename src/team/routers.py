@@ -112,8 +112,8 @@ async def take_comrade(
     status_code=status.HTTP_200_OK,
 )
 async def reject_comrade(
-    comrade_id: str,
-    team_id: str,
+    comrade_id: str | uuid.UUID,
+    team_id: str | uuid.UUID,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     _: Annotated[UserSchema, Depends(current_user)],
 ) -> ResponseSchema:

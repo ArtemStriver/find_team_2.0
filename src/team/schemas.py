@@ -47,6 +47,7 @@ class TeamSchema(BaseModel):
 class MemberSchema(BaseModel):
     team_id: str | uuid.UUID
     user_id: str | uuid.UUID
+    username: str
 
 
 class ApplicationSchema(BaseModel):
