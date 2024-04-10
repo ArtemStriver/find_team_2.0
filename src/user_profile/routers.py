@@ -1,15 +1,15 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.auth_handler import current_user
-from src.auth.schemas import UserSchema, ResponseSchema
+from src.auth.schemas import ResponseSchema, UserSchema
 from src.database import get_async_session
 from src.find.schemas import TeamPreviewSchema
 from src.user_profile import crud
-from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema
+from src.user_profile.schemas import UpdateProfileSchema, UserProfileSchema
 
 profile_router = APIRouter(
     prefix="/profile",
@@ -65,7 +65,7 @@ async def profile(
 
 
 @profile_router.patch(
-    "/change_profile",
+    "/change",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -79,7 +79,7 @@ async def change_profile(
 
 
 @profile_router.delete(
-    "/delete_profile",
+    "/delete",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )

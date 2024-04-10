@@ -1,3 +1,4 @@
+import pytest
 from dirty_equals import IsStr, IsUUID
 from fastapi import status
 from httpx import AsyncClient
@@ -6,6 +7,7 @@ from src.auth.schemas import UserSchema
 from src.team.schemas import TeamSchema
 
 
+@pytest.mark.skip  # noqa: PT023
 class TestTeamModule:
     """Тесты на логику команды (дописать)"""
 

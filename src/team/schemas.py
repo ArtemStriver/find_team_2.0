@@ -1,11 +1,10 @@
-import uuid
 import datetime
+import uuid
 from typing import Optional
 
 from pydantic import BaseModel
 
 from src.auth.schemas import UserSchema
-from src.user_profile.schemas import UserContactsSchema
 
 
 class TeamTagsSchema(BaseModel):
@@ -47,6 +46,7 @@ class TeamSchema(BaseModel):
 class MemberSchema(BaseModel):
     team_id: str | uuid.UUID
     user_id: str | uuid.UUID
+    username: str
 
 
 class ApplicationSchema(BaseModel):

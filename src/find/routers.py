@@ -8,7 +8,7 @@ from src.auth.auth_handler import current_user
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.database import get_async_session
 from src.find import crud
-from src.find.schemas import TeamPreviewSchema
+from src.find.schemas import JoinDataSchema, TeamPreviewSchema
 from src.team.schemas import TeamSchema
 
 find_router = APIRouter(
@@ -54,13 +54,12 @@ async def get_team(
     status_code=status.HTTP_200_OK,
 )
 async def join_team(
-    team_id: uuid.UUID,
-    cover_letter: str,
+    join_data: JoinDataSchema,
     user: Annotated[UserSchema, Depends(current_user)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> ResponseSchema:
     """Присоединиться к команде."""
-    return await crud.join_in_team(team_id, cover_letter, user, session)
+    return await crud.join_in_team(join_data, user, session)
 
 
 @find_router.post(

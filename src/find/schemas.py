@@ -1,5 +1,5 @@
-import uuid
 import datetime
+import uuid
 
 from pydantic import BaseModel
 
@@ -13,3 +13,8 @@ class TeamPreviewSchema(BaseModel):
     number_of_members: int
     team_deadline_at: datetime.date
     tags: TeamTagsSchema
+
+
+class JoinDataSchema(BaseModel):
+    team_id: str | uuid.UUID
+    cover_letter: str | None

@@ -1,13 +1,13 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.admin import crud, utils
 from src.admin.schemas import MainInfoOfTeamSchema, MainInfoOfUserSchema
 from src.auth.auth_handler import current_user
-from src.auth.schemas import UserSchema, ResponseSchema
+from src.auth.schemas import ResponseSchema, UserSchema
 from src.config import settings
 from src.database import get_async_session
 from src.team.schemas import TeamSchema
@@ -41,10 +41,11 @@ admin_router = APIRouter(
 async def get_all_users(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> list[UserSchema]:
+) -> list[UserSchema] | None:
     """Получение списка всех пользователей с подробной информацией о них."""
     if utils.check_admin(user.username):
         return await crud.get_all_users(session)
+    return None
 
 
 @admin_router.get(
@@ -55,10 +56,11 @@ async def get_all_users(
 async def get_all_teams(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> list[MainInfoOfTeamSchema]:
+) -> list[MainInfoOfTeamSchema] | None:
     """Получение списка всех команд с краткой информацией о них."""
     if utils.check_admin(user.username):
         return await crud.get_all_teams(session)
+    return None
 
 
 @admin_router.get(
@@ -73,6 +75,7 @@ async def search_user(
     """Поиск и получение данных о пользователе по его id."""
     if utils.check_admin(user.username):
         return await crud.search_user_data(user_id, session)
+    return None
 
 
 @admin_router.get(
@@ -88,6 +91,7 @@ async def search_team(
     """Поиск и получение данных о команде по ее id."""
     if utils.check_admin(user.username):
         return await crud.search_team_data(team_id, session)
+    return None
 
 
 @admin_router.delete(
@@ -98,10 +102,11 @@ async def delete_user(
     user_id: str | uuid.UUID,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> ResponseSchema:
+) -> ResponseSchema | None:
     """Удаление пользователя по его id."""
     if utils.check_admin(user.username):
         return await crud.delete_user(user_id, session)
+    return None
 
 
 @admin_router.delete(
@@ -112,7 +117,8 @@ async def delete_team(
     team_id: str | uuid.UUID,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[UserSchema, Depends(current_user)],
-) -> ResponseSchema:
+) -> ResponseSchema | None:
     """Удаление команды по ее id."""
     if utils.check_admin(user.username):
         return await crud.delete_team(team_id, session)
+    return None

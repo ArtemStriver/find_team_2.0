@@ -8,9 +8,9 @@ from redis.asyncio import Redis as AsyncRedis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
-from src.auth.crud import create_user, get_user, get_user_by_id, verify_user_data, change_password
+from src.auth.crud import change_password, create_user, get_user, get_user_by_id, verify_user_data
 from src.auth.models import AuthUser
-from src.auth.schemas import CreateUserSchema, LoginUserSchema, UserSchema, ResponseSchema, PasswordChangeSchema
+from src.auth.schemas import CreateUserSchema, LoginUserSchema, PasswordChangeSchema, ResponseSchema, UserSchema
 from src.config import settings
 from src.database import get_async_session
 from src.email_settings import send_email
@@ -203,6 +203,7 @@ class AuthHandler:
                                    f"http://127.0.0.1:8000/auth/verify/{token}",
             )
             return True
+        return False
 
     @classmethod
     async def register_user(

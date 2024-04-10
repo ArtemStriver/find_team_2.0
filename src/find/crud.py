@@ -7,10 +7,9 @@ from sqlalchemy.orm import selectinload
 
 from src.auth.models import AuthUser
 from src.auth.schemas import ResponseSchema, UserSchema
-from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
+from src.find.schemas import JoinDataSchema
+from src.team.models import Team, TeamTags, application_to_join_table, team_members_table
 from src.team.schemas import TeamSchema, TeamTagsSchema
-from src.user_profile.models import UserContacts
-from src.user_profile.schemas import UserContactsSchema
 
 
 async def get_teams_list(
@@ -62,7 +61,16 @@ async def get_team_data(
     )
     query_owner_name = (select(AuthUser).where(AuthUser.id == result_team_data.owner))
     result_owner_name = (await session.execute(query_owner_name)).unique().scalar_one_or_none()
-    team = TeamSchema(
+    members = []
+    for user_auth_data in result_team_data.members:
+        new_data = UserSchema(
+            id=user_auth_data.id,
+            username=user_auth_data.username,
+            email=user_auth_data.email,
+            verified=user_auth_data.verified,
+        )
+        members.append(new_data)
+    return TeamSchema(
         id=result_team_data.id,
         owner=result_team_data.owner,
         owner_name=result_owner_name.username,
@@ -74,15 +82,13 @@ async def get_team_data(
         team_city=result_team_data.team_city,
         created_at=result_team_data.created_at,
         updated_at=result_team_data.updated_at,
-        members=result_team_data.members,
+        members=members,
         tags=tags,
     )
-    return team
 
 
 async def join_in_team(
-    team_id: uuid.UUID,
-    cover_letter: str | None,
+    join_data: JoinDataSchema,
     user: UserSchema,
     session: AsyncSession,
 ) -> ResponseSchema:
@@ -90,8 +96,8 @@ async def join_in_team(
     try:
         stmt = insert(application_to_join_table).values(
             {"user_id": user.id,
-             "team_id": team_id,
-             "cover_letter": cover_letter},
+             "team_id": uuid.UUID(join_data.team_id),
+             "cover_letter": join_data.cover_letter},
         )
         await session.execute(stmt)
         await session.commit()

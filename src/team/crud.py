@@ -4,9 +4,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import and_, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.crud import get_user_by_id
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.find.crud import get_team_data
-from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
+from src.team.models import Team, TeamTags, application_to_join_table, team_members_table
 from src.team.schemas import ApplicationSchema, CreateTeamSchema, MemberSchema
 
 
@@ -59,7 +60,6 @@ async def update_team(
         .values({
             "title": update_data.title,
             "number_of_members": update_data.number_of_members,
-            "team_contacts": update_data.team_contacts,
             "team_description": update_data.team_description,
             "team_deadline_at": update_data.team_deadline_at,
             "team_city": update_data.team_city,
@@ -91,7 +91,7 @@ async def update_team(
     await session.commit()
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="team updated",
+        detail="team is updated",
     )
 
 
@@ -117,7 +117,7 @@ async def delete_team(
         )
     return ResponseSchema(
         status_code=status.HTTP_200_OK,
-        detail="team deleted",
+        detail="team is deleted",
     )
 
 
@@ -129,15 +129,26 @@ async def get_members_list(
     """Получение список участников команды."""
     query = select(Team).where(Team.id == team_id)
     result = await session.execute(query)
-    if result.scalar_one_or_none().owner == user.id:
-        query = select(team_members_table).where(team_members_table.c.team_id == team_id)
-        result = await session.execute(query)
-    else:
+    team_data = result.scalar_one_or_none()
+    query = select(team_members_table).where(team_members_table.c.team_id == team_id)
+    result = await session.execute(query)
+    members_without_name = result.all()
+    if (team_data.owner != user.id and
+            (user.id, uuid.UUID(team_id)) not in members_without_name):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="no access",
         ) from None
-    return result.all()
+    members = []
+    for member in members_without_name:
+        username = (await get_user_by_id(member[0], session)).username
+        member_data = MemberSchema(
+            team_id=member[1],
+            user_id=member[0],
+            username=username,
+        )
+        members.append(member_data)
+    return members
 
 
 async def get_application_list(
@@ -186,15 +197,14 @@ async def move_comrade_into_team(
 
 
 async def remove_application_of_comrade(
-    comrade_id: uuid.UUID,
-    team_id: uuid.UUID,
+    comrade_id: uuid.UUID | str,
+    team_id: uuid.UUID | str,
     session: AsyncSession,
 ) -> ResponseSchema:
     """Отклонить заявку пользователя на вступление в команду."""
     try:
         await _delete_application(comrade_id, team_id, session)
 
-        await session.commit()
         return ResponseSchema(
             status_code=status.HTTP_200_OK,
             detail="comrade's application rejected",
@@ -207,8 +217,8 @@ async def remove_application_of_comrade(
 
 
 async def _delete_application(
-    comrade_id: uuid.UUID,
-    team_id: uuid.UUID,
+    comrade_id: uuid.UUID | str,
+    team_id: uuid.UUID | str,
     session: AsyncSession,
 ) -> None:
     """Удалить заявку из БД."""
@@ -219,6 +229,7 @@ async def _delete_application(
         ),
     )
     await session.execute(stmt)
+    await session.commit()
 
 
 async def exclude_comrade_from_team(

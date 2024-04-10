@@ -58,6 +58,10 @@ unfixable = [
     "ERA001",   # eradicate: found commented out code (can be dangerous if fixed automatically)
 ]
 ignore = [
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF010",
     "INP001",
     "PT004",
     "PT018",
