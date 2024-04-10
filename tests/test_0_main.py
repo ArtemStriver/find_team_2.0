@@ -1,6 +1,6 @@
 import asyncio
 
-from dirty_equals import IsStr
+from dirty_equals import IsStr, IsUUID
 from httpx import AsyncClient
 from starlette import status
 
@@ -424,4 +424,91 @@ class TestAllFunctional:
             "detail": "there is no such team",
         }
 
-        """8. Изменение и удаление профиля пользователя."""
+        """8.1. Изменение профиля пользователя."""
+        update_team_data = {
+            "username": "new_test_user_2_name",
+            "image_path": "string",
+            "contacts": {
+                "email": register_user_2.email,
+                "vk": None,
+                "telegram": None,
+                "discord": None,
+                "other": "some link"
+            },
+            "description": "My new description.",
+            "hobbies": {
+                "lifestyle1": "faith",
+                "lifestyle2": "love",
+                "lifestyle3": "hope",
+                "sport1": None,
+                "sport2": None,
+                "sport3": "sport",
+                "work1": "hard-work",
+                "work2": None,
+                "work3": None,
+            }
+        }
+        response = await async_client.patch(
+            "/profile/change",
+            json=update_team_data,
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "detail": "profile is updated",
+        }
+
+        """8.2 Проверка изменений профиля пользователя."""
+        response = await async_client.get(
+            f"/profile/{register_user_2.id}",
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "id": IsUUID,
+            "user_id": str(register_user_2.id),
+            "username": "new_test_user_2_name",
+            "image_path": "string",
+            "contacts": {
+                "email": register_user_2.email,
+                "vk": None,
+                "telegram": None,
+                "discord": None,
+                "other": "some link"
+            },
+            "description": "My new description.",
+            "hobbies": {
+                "lifestyle1": "faith",
+                "lifestyle2": "love",
+                "lifestyle3": "hope",
+                "sport1": None,
+                "sport2": None,
+                "sport3": "sport",
+                "work1": "hard-work",
+                "work2": None,
+                "work3": None,
+            }
+        }
+
+        """8.3. Удаление профиля пользователя."""
+        response = await async_client.delete(
+            "/profile/delete",
+            cookies=user_2_cookies,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == {
+            "status_code": 200,
+            "detail": "user and his profile deleted",
+        }
+
+        """8.4. Проверка отсутствия профиля пользователя."""
+        _ = await async_client.post(
+            "/auth/login",
+            json=user_data_1,
+        )
+        response = await async_client.get(
+            f"/profile/{register_user_2.id}",
+            cookies=user_1_cookies,
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND

@@ -65,7 +65,7 @@ async def profile(
 
 
 @profile_router.patch(
-    "/change_profile",
+    "/change",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -79,7 +79,7 @@ async def change_profile(
 
 
 @profile_router.delete(
-    "/delete_profile",
+    "/delete",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
