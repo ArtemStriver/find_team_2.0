@@ -1,19 +1,19 @@
 import uuid
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, delete, and_
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.admin.schemas import MainInfoOfTeamSchema, MainInfoOfUserSchema
 from src.auth import crud as auth_crud
 from src.auth.models import AuthUser
-from src.auth.schemas import UserSchema, ResponseSchema
+from src.auth.schemas import ResponseSchema, UserSchema
 from src.find.crud import get_team_data
 from src.team.models import Team, TeamTags
-from src.team.schemas import TeamTagsSchema, TeamSchema
+from src.team.schemas import TeamSchema, TeamTagsSchema
 from src.user_profile.crud import get_user_profile
-from src.user_profile.models import UserProfile, UserContacts, UserHobbies
+from src.user_profile.models import UserContacts, UserProfile
 from src.user_profile.schemas import UserContactsSchema
 
 
@@ -76,7 +76,7 @@ async def search_user_data(
         other=result_contacts.other,
     )
     username = (await auth_crud.get_user_by_id(user_id, session)).username
-    user_data = MainInfoOfUserSchema(
+    return MainInfoOfUserSchema(
         user_id=user_id,
         profile_id=user_profile.id,
         username=username,
@@ -87,7 +87,6 @@ async def search_user_data(
         link_user_discord=user_contacts.discord,
         link_user_other=user_contacts.other,
     )
-    return user_data
 
 
 async def search_team_data(
@@ -119,7 +118,7 @@ async def search_team_data(
     )
     query_owner_name = (select(AuthUser).where(AuthUser.id == result_team_data.owner))
     result_owner_name = (await session.execute(query_owner_name)).unique().scalar_one_or_none()
-    team = TeamSchema(
+    return TeamSchema(
         id=result_team_data.id,
         owner=result_team_data.owner,
         owner_name=result_owner_name.username,
@@ -134,7 +133,6 @@ async def search_team_data(
         members=None,
         tags=tags,
     )
-    return team
 
 
 async def delete_user(

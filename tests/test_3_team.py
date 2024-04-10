@@ -7,7 +7,7 @@ from src.auth.schemas import UserSchema
 from src.team.schemas import TeamSchema
 
 
-@pytest.mark.skip
+@pytest.mark.skip  # noqa: PT023
 class TestTeamModule:
     """Тесты на логику команды (дописать)"""
 

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import utils as auth_utils
 from src.auth.models import AuthUser
-from src.auth.schemas import CreateUserSchema, UserSchema, PasswordChangeSchema
+from src.auth.schemas import CreateUserSchema, PasswordChangeSchema, UserSchema
 from src.user_profile.crud import create_user_profile
 
 

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.crud import get_user_by_id
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.find.crud import get_team_data
-from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
+from src.team.models import Team, TeamTags, application_to_join_table, team_members_table
 from src.team.schemas import ApplicationSchema, CreateTeamSchema, MemberSchema
 
 

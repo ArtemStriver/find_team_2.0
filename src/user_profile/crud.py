@@ -1,17 +1,17 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import status, HTTPException, Response
-from sqlalchemy import and_, select, insert, update, delete
+from fastapi import HTTPException, Response, status
+from sqlalchemy import and_, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import crud as auth_crud
 from src.auth.models import AuthUser
-from src.auth.schemas import UserSchema, ResponseSchema
-from src.team.models import Team, team_members_table, TeamTags
+from src.auth.schemas import ResponseSchema, UserSchema
+from src.team.models import Team, TeamTags, team_members_table
 from src.team.schemas import TeamSchema
-from src.user_profile.models import UserProfile, UserContacts, UserHobbies
-from src.user_profile.schemas import UserProfileSchema, UpdateProfileSchema, UserContactsSchema, UserHobbiesSchema
+from src.user_profile.models import UserContacts, UserHobbies, UserProfile
+from src.user_profile.schemas import UpdateProfileSchema, UserContactsSchema, UserHobbiesSchema, UserProfileSchema
 
 
 async def get_user_profile(
@@ -48,7 +48,7 @@ async def get_user_profile(
             work3=result_hobbies.work3,
         )
         username = (await auth_crud.get_user_by_id(user_id, session)).username
-        profile_data = UserProfileSchema(
+        return UserProfileSchema(
             id=user_profile.id,
             user_id=user_profile.user_id,
             username=username,
@@ -57,12 +57,11 @@ async def get_user_profile(
             description=user_profile.description,
             hobbies=user_hobbies,
         )
-        return profile_data
-    except Exception:
+    except Exception:  # noqa: BLE001
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="cannot get profile data",
-        )
+        ) from None
 
 
 async def create_user_profile(
@@ -75,20 +74,20 @@ async def create_user_profile(
                 "user_id": user.id,
                 "image_path": "images/default.jpg",
                 "description": "Your description",
-            }
+            },
         )
         await session.execute(stmt)
         stmt = insert(UserContacts).values(
             {
                 "user_id": user.id,
                 "email": user.email,
-            }
+            },
         )
         await session.execute(stmt)
         stmt = insert(UserHobbies).values(
             {
                 "user_id": user.id,
-            }
+            },
         )
         await session.execute(stmt)
         await session.commit()
@@ -163,7 +162,7 @@ async def delete_user_profile(
             detail="there is no such user or profile",
         )
     stmt_profile = delete(UserProfile).where(
-        and_(UserProfile.id == user_profile.id, UserProfile.user_id == user.id)
+        and_(UserProfile.id == user_profile.id, UserProfile.user_id == user.id),
     )
     stmt_user = delete(AuthUser).where(AuthUser.id == user.id)
     stmt_contacts = delete(UserContacts).where(UserContacts.user_id == user.id)

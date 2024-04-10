@@ -4,7 +4,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 
-@pytest.mark.skip
+@pytest.mark.skip  # noqa: PT023
 class TestFindModule:
 
     async def test_team_list(

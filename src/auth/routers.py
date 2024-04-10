@@ -13,8 +13,9 @@ from src.auth.auth_handler import AuthHandler
 from src.auth.schemas import (
     CreateUserSchema,
     LoginUserSchema,
+    PasswordChangeSchema,
     ResponseSchema,
-    UserSchema, PasswordChangeSchema,
+    UserSchema,
 )
 from src.database import get_async_session
 from src.user_profile.crud import create_user_profile
@@ -118,7 +119,7 @@ async def recover_password(
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
-async def recover_password(
+async def change_password(
     token: str,
     password_data: PasswordChangeSchema,
     session: Annotated[AsyncSession, Depends(get_async_session)],

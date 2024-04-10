@@ -2,8 +2,6 @@ import uuid
 
 from pydantic import BaseModel
 
-from src.team.schemas import TeamTagsSchema
-
 
 class MainInfoOfTeamSchema(BaseModel):
     id: uuid.UUID | str

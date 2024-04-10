@@ -8,10 +8,8 @@ from sqlalchemy.orm import selectinload
 from src.auth.models import AuthUser
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.find.schemas import JoinDataSchema
-from src.team.models import Team, application_to_join_table, team_members_table, TeamTags
+from src.team.models import Team, TeamTags, application_to_join_table, team_members_table
 from src.team.schemas import TeamSchema, TeamTagsSchema
-from src.user_profile.models import UserContacts
-from src.user_profile.schemas import UserContactsSchema
 
 
 async def get_teams_list(
@@ -72,7 +70,7 @@ async def get_team_data(
             verified=user_auth_data.verified,
         )
         members.append(new_data)
-    team = TeamSchema(
+    return TeamSchema(
         id=result_team_data.id,
         owner=result_team_data.owner,
         owner_name=result_owner_name.username,
@@ -87,7 +85,6 @@ async def get_team_data(
         members=members,
         tags=tags,
     )
-    return team
 
 
 async def join_in_team(

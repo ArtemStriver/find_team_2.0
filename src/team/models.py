@@ -1,5 +1,5 @@
-import uuid
 import datetime
+import uuid
 
 from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -42,16 +42,16 @@ class Team(Base):
 
     team_deadline_at: Mapped[datetime.date] = mapped_column(
         nullable=False,
-        default=datetime.date.today
+        default=datetime.date.today,
     )
 
     team_city: Mapped[str] = mapped_column(nullable=False, default="Интернет")
 
     created_at: Mapped[datetime.datetime] = mapped_column(
-        default=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+        default=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
-        default=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+        default=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None),
     )
 
     members = relationship(

@@ -8,7 +8,7 @@ from src.auth.auth_handler import current_user
 from src.auth.schemas import ResponseSchema, UserSchema
 from src.database import get_async_session
 from src.find import crud
-from src.find.schemas import TeamPreviewSchema, JoinDataSchema
+from src.find.schemas import JoinDataSchema, TeamPreviewSchema
 from src.team.schemas import TeamSchema
 
 find_router = APIRouter(

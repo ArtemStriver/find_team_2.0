@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import select, insert
+from sqlalchemy import insert, select
 
 from src.auth import utils as auth_utils
 from src.auth.models import AuthUser
@@ -18,19 +18,19 @@ user_data = {
     "username": "user",
     "email": "user@example.com",
     "hashed_password": "string",
-    "confirmed_password": "string"
+    "confirmed_password": "string",
 }
 test_user_data_1 = {
     "username": "test1",
     "email": "test1@example.com",
     "hashed_password": "string",
-    "confirmed_password": "string"
+    "confirmed_password": "string",
 }
 test_user_data_2 = {
     "username": "test2",
     "email": "test2@example.com",
     "hashed_password": "string",
-    "confirmed_password": "string"
+    "confirmed_password": "string",
 }
 team_data = {
     "title": "string",
@@ -46,8 +46,8 @@ team_data = {
         "tag4": "string",
         "tag5": "string",
         "tag6": "string",
-        "tag7": "string"
-    }
+        "tag7": "string",
+    },
 }
 
 

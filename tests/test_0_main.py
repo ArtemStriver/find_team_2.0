@@ -16,13 +16,13 @@ class TestAllFunctional:
         register_user_2: UserSchema,
     ) -> None:
         """
-        Комплексный тест на проверку базового сценария работы с приложением:
+        Комплексный тест на проверку базового сценария работы c приложением:
         1. Авторизация двух пользователей.
         2. Создание команд пользователями.
         3. Обмен заявками на вступление в команду.
         4. Принятие заявок одним, отклонение заявки другим пользователем.
         5. Исключение пользователя из команды.
-        6. Повторная заявка и прием пользователя в команду с последующим самостоятельным выходом из нее пользователя.
+        6. Повторная заявка и прием пользователя в команду c последующим самостоятельным выходом из нее пользователя.
         7. Изменение данных и удаление команды.
         8. Изменение и удаление профиля пользователя.
         """
@@ -44,12 +44,12 @@ class TestAllFunctional:
                 "id": str(register_user_1.id),
                 "username": "test1",
                 "email": "test1@example.com",
-                'verified': True,
-            }
+                "verified": True,
+            },
         }
         user_1_cookies = {
             "find-team": response.cookies["find-team"],
-            "rstoken": response.cookies["rstoken"]
+            "rstoken": response.cookies["rstoken"],
         }
 
         """2.1. Создание команды первым пользователем."""
@@ -98,12 +98,12 @@ class TestAllFunctional:
                 "id": str(register_user_2.id),
                 "username": "test2",
                 "email": "test2@example.com",
-                'verified': True,
-            }
+                "verified": True,
+            },
         }
         user_2_cookies = {
             "find-team": response.cookies["find-team"],
-            "rstoken": response.cookies["rstoken"]
+            "rstoken": response.cookies["rstoken"],
         }
 
         """2.2. Создание команды вторым пользователем."""
@@ -168,7 +168,7 @@ class TestAllFunctional:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "status_code": 200,
-            "detail": "your application has been submitted"
+            "detail": "your application has been submitted",
         }
 
         """3.2. Заявка первого пользователя на вступление в команду второго пользователя."""
@@ -187,7 +187,7 @@ class TestAllFunctional:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "status_code": 200,
-            "detail": "your application has been submitted"
+            "detail": "your application has been submitted",
         }
 
         """3.3. Проверка заявки на вступление в команду первого пользователя вторым."""
@@ -199,7 +199,7 @@ class TestAllFunctional:
         assert response.json() == [{
             "user_id": str(register_user_2.id),
             "team_id": team_data_1["id"],
-            "cover_letter": "Is user 2"
+            "cover_letter": "Is user 2",
         }]
 
         """3.4. Проверка заявки на вступление в команду второго пользователя первым."""
@@ -215,7 +215,7 @@ class TestAllFunctional:
         assert response.json() == [{
             "user_id": str(register_user_1.id),
             "team_id": team_data_2["id"],
-            "cover_letter": "Is user 1"
+            "cover_letter": "Is user 1",
         }]
 
         """4.1. Принятие заявки вторым пользователем."""
@@ -236,7 +236,7 @@ class TestAllFunctional:
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == [{
-            "team_id": team_data_2['id'],
+            "team_id": team_data_2["id"],
             "user_id": str(register_user_1.id),
             "username": register_user_1.username,
         }]
@@ -290,7 +290,7 @@ class TestAllFunctional:
 
         """
         6.1. Повторная заявка и прием второго пользователя в команду первого
-            с последующим самостоятельным выходом из нее пользователя.
+            c последующим самостоятельным выходом из нее пользователя.
         """
         response = await async_client.post(
             "/find/join",
@@ -323,7 +323,7 @@ class TestAllFunctional:
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == [{
-            "team_id": team_data_1['id'],
+            "team_id": team_data_1["id"],
             "user_id": str(register_user_2.id),
             "username": register_user_2.username,
         }]
@@ -433,7 +433,7 @@ class TestAllFunctional:
                 "vk": None,
                 "telegram": None,
                 "discord": None,
-                "other": "some link"
+                "other": "some link",
             },
             "description": "My new description.",
             "hobbies": {
@@ -446,7 +446,7 @@ class TestAllFunctional:
                 "work1": "hard-work",
                 "work2": None,
                 "work3": None,
-            }
+            },
         }
         response = await async_client.patch(
             "/profile/change",
@@ -475,7 +475,7 @@ class TestAllFunctional:
                 "vk": None,
                 "telegram": None,
                 "discord": None,
-                "other": "some link"
+                "other": "some link",
             },
             "description": "My new description.",
             "hobbies": {
@@ -488,7 +488,7 @@ class TestAllFunctional:
                 "work1": "hard-work",
                 "work2": None,
                 "work3": None,
-            }
+            },
         }
 
         """8.3. Удаление профиля пользователя."""
