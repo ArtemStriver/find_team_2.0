@@ -63,7 +63,7 @@ async def join_team(
 
 
 @find_router.post(
-    "/quit/{team_id}",
+    "/quit",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )

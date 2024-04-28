@@ -3,12 +3,15 @@ import uuid
 from pydantic import BaseModel
 
 
-class UserContactsSchema(BaseModel):
-    email: str
+class UserContactsWithoutEmailSchema(BaseModel):
     vk: str | None = None
     telegram: str | None = None
     discord: str | None = None
     other: str | None = None
+
+
+class UserContactsSchema(UserContactsWithoutEmailSchema):
+    email: str
 
 
 class UserHobbiesSchema(BaseModel):
@@ -36,6 +39,6 @@ class UserProfileSchema(BaseModel):
 class UpdateProfileSchema(BaseModel):
     username: str
     image_path: str
-    contacts: UserContactsSchema
+    contacts: UserContactsWithoutEmailSchema
     description: str
     hobbies: UserHobbiesSchema
