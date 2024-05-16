@@ -59,6 +59,7 @@ async def update_team(
         update(Team)
         .values({
             "title": update_data.title,
+            "type_team": update_data.type_team,
             "number_of_members": update_data.number_of_members,
             "team_description": update_data.team_description,
             "team_deadline_at": update_data.team_deadline_at,

@@ -10,6 +10,7 @@ class TeamPreviewSchema(BaseModel):
     id: uuid.UUID
     title: str
     type_team: str
+    team_city: str
     number_of_members: int
     team_deadline_at: datetime.date
     tags: TeamTagsSchema
