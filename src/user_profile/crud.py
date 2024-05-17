@@ -73,7 +73,7 @@ async def create_user_profile(
             {
                 "user_id": user.id,
                 "image_path": "images/default.jpg",
-                "description": "Your description",
+                "description": "",
             },
         )
         await session.execute(stmt)

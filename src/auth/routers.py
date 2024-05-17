@@ -92,13 +92,12 @@ async def verify(
     token: str,
     response: Response,
     session: Annotated[AsyncSession, Depends(get_async_session)],
-) -> ResponseSchema:
+):
     """Проверка подлинности email адреса пользователя."""
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
     await create_user_profile(user, session)
-    # TODO RedirectResponse("http://127.0.0.1:3000/home") - на митап
-    return RedirectResponse("http://127.0.0.1:3000/home")
+    return RedirectResponse("http://localhost:3000/public")
 
 
 @auth_router.post(
@@ -115,7 +114,7 @@ async def recover_password(
 
 
 @auth_router.post(
-    "/change_password/{token}",
+    "/change_password",
     response_model=ResponseSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -126,8 +125,7 @@ async def change_password(
 ) -> ResponseSchema:
     """Изменить пароль пользователя"""
     await AuthHandler.change_user_password(token, password_data, session)
-    # TODO RedirectResponse("http://127.0.0.1:3000/home") - на митап
     return ResponseSchema(
-        status_code=status.HTTP_201_CREATED,
-        detail="the password has been changed",
+        status_code=status.HTTP_200_OK,
+        detail="password is changed",
     )

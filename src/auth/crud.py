@@ -29,7 +29,7 @@ async def get_user_by_id(
     user_id: uuid.UUID,
     session: AsyncSession,
 ) -> AuthUser | None:
-    """Получение данных o пользователе из БД по id."""
+    """Получение данных о пользователе из БД по id."""
     query = select(AuthUser).where(AuthUser.id == user_id)
     result = await session.execute(query)
     return result.scalar_one_or_none()
@@ -55,16 +55,15 @@ async def create_user(
             "username": user_data.username,
             "email": user_data.email,
             "hashed_password": auth_utils.hash_password(user_data.hashed_password),
-            # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
-            "verified": True,
+            "verified": False,
         },
     )
     await session.execute(stmt)
     user = await get_user(user_data.email, session)
     await session.commit()
-    # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
-    await create_user_profile(user, session)
-    # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
+    # # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
+    # await create_user_profile(user, session)
+    # # TODO СДЕЛАНО ТОЛЬКО ДЛЯ ОТЛАДКИ !!! НА ПРОДАКШЕНЕ УБРАТЬ !!!
     return UserSchema(
         id=user.id,
         username=user.username,
