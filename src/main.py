@@ -3,13 +3,14 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.admin.routers import admin_router
 from src.auth.routers import auth_router
+from src.config import settings
 from src.find.routers import find_router
 from src.team.routers import team_router
 from src.user_profile.routers import profile_router
 
 app = FastAPI(
     title="Find Team 2.0",
-    docs_url="/",
+    docs_url=f"/{settings.SECRET_PATH}",
 )
 
 
