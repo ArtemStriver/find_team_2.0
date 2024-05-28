@@ -200,7 +200,7 @@ class AuthHandler:
                 user_email=user.email,
                 subject="Подтверждение регистрации",
                 content_with_token=f"Для подтверждения email, перейдите по ссылке: "
-                                   f"http://127.0.0.1:8000/auth/verify/{token}",
+                                   f"{settings.SERVER_HOST}/auth/verify/{token}",
             )
             return True
         return False
@@ -221,7 +221,7 @@ class AuthHandler:
             user_email=user.email,
             subject="Подтверждение регистрации",
             content_with_token=f"Для подтверждения email, перейдите по ссылке: "
-                               f"http://localhost:8000/auth/verify/{token}",
+                               f"{settings.SERVER_HOST}/auth/verify/{token}",
         )
 
     @staticmethod
@@ -264,8 +264,7 @@ class AuthHandler:
             subject="Сброс пароля",
             content_with_token=f"Если вы не хотели менять пароль - проигнорируйте это сообщение!!!\n\n"
                                f"Для сброса пароля, перейдите по ссылке: "
-                               # TODO поменять ссылку - она должна вести на фронтенд и передавать в ней токен.
-                               f"http://localhost:3000/profile/change_password/{token}",
+                               f"{settings.CLIENT_HOST}/profile/change_password/{token}",
         )
         return ResponseSchema(
             status_code=status.HTTP_201_CREATED,

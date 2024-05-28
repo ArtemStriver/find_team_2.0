@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     SECRET_PATH: str
     ALLOWED_USERS: str
 
+    CLIENT_HOST: str
+    SERVER_HOST: str
+
     class Config:
         env_file = ".env"
 

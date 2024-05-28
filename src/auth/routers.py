@@ -17,6 +17,7 @@ from src.auth.schemas import (
     ResponseSchema,
     UserSchema,
 )
+from src.config import settings
 from src.database import get_async_session
 from src.user_profile.crud import create_user_profile
 
@@ -97,7 +98,7 @@ async def verify(
     user = await AuthHandler.verify_user_data(token, session)
     AuthHandler.create_all_tokens(response, user)
     await create_user_profile(user, session)
-    return RedirectResponse("http://localhost:3000/public")
+    return RedirectResponse(f"{settings.CLIENT_HOST}/public")
 
 
 @auth_router.post(
